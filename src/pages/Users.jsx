@@ -11,7 +11,7 @@ const API_BASE =
 
 const USER_SITE_BASE =
   import.meta.env.VITE_USER_SITE_URL ||
-  "https://your-user-website.com";
+  "https://fsphile.com";
 
 const USERS_CACHE_KEY = "admin_users_page_cache_v1";
 
