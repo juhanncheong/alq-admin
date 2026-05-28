@@ -179,12 +179,6 @@ export default function TargetedBonusOffers() {
         shellTitle: "Entrepreneur Application",
         recordsTitle: "Entrepreneur Application Records",
         tableTitle: "Automated Entrepreneur Offers",
-        createButton: "Presaved Entrepreneur Package",
-        createModalTitle: "Presaved Entrepreneur Package",
-        createModalDesc:
-          "This package is automatically assigned when a user completes their first approved withdrawal.",
-        submitText: "Save Entrepreneur Package",
-        successText: "Entrepreneur package saved",
         emptyText: "No entrepreneur offers found.",
         defaultTitle: "Entrepreneur Application",
         defaultDescription: "Pick a tier - Cash in - Get extra bonus.",
@@ -312,6 +306,15 @@ export default function TargetedBonusOffers() {
       isFull: Boolean(item.isFull),
     }));
   }, [form.options]);
+
+  const cleanTemplateOptions = useMemo(() => {
+    return templateForm.options.map((item) => ({
+      tierTitle: String(item.tierTitle || "").trim(),
+      depositAmount: Number(item.depositAmount),
+      bonusAmount: Number(item.bonusAmount),
+      isFull: Boolean(item.isFull),
+    }));
+  }, [templateForm.options]);
 
   function resetCreateForm() {
     setForm({
@@ -1338,26 +1341,12 @@ export default function TargetedBonusOffers() {
                     {form.options.map((option, index) => (
                       <div
                         key={index}
-                        className={`grid gap-2 rounded-2xl border p-3 ${
-                          eventType === "entrepreneur"
-                            ? "md:grid-cols-[1.2fr_1fr_1fr_auto_auto]"
-                            : "md:grid-cols-[1fr_1fr_auto_auto]"
-                        } ${
+                        className={`grid gap-2 rounded-2xl border p-3 md:grid-cols-[1fr_1fr_auto_auto] ${
                           isDark
                             ? "border-white/10 bg-white/5"
                             : "border-gray-200 bg-gray-50"
                         }`}
                       >
-                        {eventType === "entrepreneur" ? (
-                          <input
-                            value={option.tierTitle}
-                            onChange={(e) =>
-                              updateOption(index, "tierTitle", e.target.value)
-                            }
-                            placeholder="Package title"
-                            className={inputClass}
-                          />
-                        ) : null}
 
                         <input
                           type="number"
