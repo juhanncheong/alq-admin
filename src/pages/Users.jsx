@@ -9,6 +9,10 @@ const API_BASE =
   import.meta.env.VITE_API_URL ||
   "https://shaky-emmye-jayjay122-068ebc66.koyeb.app";
 
+const USER_SITE_BASE =
+  import.meta.env.VITE_USER_SITE_URL ||
+  "https://your-user-website.com";
+
 const USERS_CACHE_KEY = "admin_users_page_cache_v1";
 
 function loadUsersCache() {
@@ -771,6 +775,46 @@ function applyWalletUserUpdate(userId, user) {
         }
       : prev
   );
+}
+
+async function accessUserAccount(user) {
+  if (!user?._id) {
+    toast.error("User not found");
+    return;
+  }
+
+  setBusyId(user._id);
+
+  try {
+    const data = await fetchJSON(
+      `${API_BASE}/api/admin/users/${user._id}/access-account`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    if (!data?.token) {
+      throw new Error("No access token returned");
+    }
+
+    const adminToken = localStorage.getItem("admin_token");
+
+    if (adminToken) {
+      localStorage.setItem("admin_token_backup", adminToken);
+    }
+
+    toast.success("Opening user account...");
+
+    const accessUrl =
+      `${USER_SITE_BASE}/admin-access.html#token=${encodeURIComponent(data.token)}`;
+    
+    window.open(accessUrl, "_blank", "noopener,noreferrer");
+  } catch (e) {
+    toast.error(e.message || "Failed to access user account");
+  } finally {
+    setBusyId(null);
+  }
 }
 
 function goToTrialBonus(user) {
@@ -2939,6 +2983,21 @@ async function toggleSigninReward(user) {
                         Reason: {actionsModal.user.orderStartBlockMessage || "-"}
                       </div>
                     ) : null}
+                                    </button>
+
+                  <button
+                    disabled={busyId === actionsModal.user._id}
+                    onClick={() => {
+                      const u = actionsModal.user;
+                      setActionsModal({ open: false, user: null });
+                      accessUserAccount(u);
+                    }}
+                    className={`${actionPlainClass} disabled:opacity-50`}
+                  >
+                    <div className="font-semibold">Access Account</div>
+                    <div className="mt-1 text-[11px] opacity-70">
+                      Open platform as this user
+                    </div>
                   </button>
 
                 </div>
