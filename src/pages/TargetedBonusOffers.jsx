@@ -51,6 +51,23 @@ export default function TargetedBonusOffers() {
   const [busyId, setBusyId] = useState(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
+  const [templateModalOpen, setTemplateModalOpen] = useState(false);
+  const [templateLoading, setTemplateLoading] = useState(false);
+  const [templateSaving, setTemplateSaving] = useState(false);
+  
+  const [templateForm, setTemplateForm] = useState({
+    title: "",
+    description: "",
+    options: [
+      {
+        tierTitle: "",
+        depositAmount: "",
+        bonusAmount: "",
+        isFull: false,
+      },
+    ],
+  });
+
   const [confirmModal, setConfirmModal] = useState({
     open: false,
     type: "",
@@ -161,13 +178,13 @@ export default function TargetedBonusOffers() {
         eventType: "entrepreneur",
         shellTitle: "Entrepreneur Application",
         recordsTitle: "Entrepreneur Application Records",
-        tableTitle: "Entrepreneur Application Offers",
-        createButton: "+ Create Entrepreneur Offer",
-        createModalTitle: "Create Entrepreneur Application",
+        tableTitle: "Automated Entrepreneur Offers",
+        createButton: "Presaved Entrepreneur Package",
+        createModalTitle: "Presaved Entrepreneur Package",
         createModalDesc:
-          "Create a private entrepreneur deposit bonus offer by user UID.",
-        submitText: "Create Entrepreneur Offer",
-        successText: "Entrepreneur offer created",
+          "This package is automatically assigned when a user completes their first approved withdrawal.",
+        submitText: "Save Entrepreneur Package",
+        successText: "Entrepreneur package saved",
         emptyText: "No entrepreneur offers found.",
         defaultTitle: "Entrepreneur Application",
         defaultDescription: "Pick a tier - Cash in - Get extra bonus.",
@@ -310,6 +327,96 @@ export default function TargetedBonusOffers() {
     setCreateModalOpen(true);
   }
 
+  function resetTemplateForm() {
+    setTemplateForm({
+      title: eventConfig.defaultTitle,
+      description: eventConfig.defaultDescription,
+      options: eventConfig.defaultOptions.map((item) => ({ ...item })),
+    });
+  }
+  
+  async function openTemplateModal() {
+    resetTemplateForm();
+    setTemplateModalOpen(true);
+    setTemplateLoading(true);
+  
+    try {
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/bonus-offer-templates/entrepreneur`
+      );
+  
+      const template = data.template || {};
+  
+      setTemplateForm({
+        title: template.title || eventConfig.defaultTitle,
+        description: template.description || eventConfig.defaultDescription,
+        options:
+          Array.isArray(template.options) && template.options.length > 0
+            ? template.options.map((item) => ({
+                tierTitle: item.tierTitle || "",
+                depositAmount: String(item.depositAmount ?? ""),
+                bonusAmount: String(item.bonusAmount ?? ""),
+                isFull: Boolean(item.isFull),
+              }))
+            : eventConfig.defaultOptions.map((item) => ({ ...item })),
+      });
+    } catch (err) {
+      toast.error(err.message || "Failed to load entrepreneur package");
+    } finally {
+      setTemplateLoading(false);
+    }
+  }
+  
+  function closeTemplateModal() {
+    if (templateSaving) return;
+    setTemplateModalOpen(false);
+  }
+  
+  function updateTemplateOption(index, key, value) {
+    setTemplateForm((prev) => {
+      const nextOptions = [...prev.options];
+  
+      nextOptions[index] = {
+        ...nextOptions[index],
+        [key]: value,
+      };
+  
+      return {
+        ...prev,
+        options: nextOptions,
+      };
+    });
+  }
+  
+  function addTemplateOption() {
+    setTemplateForm((prev) => ({
+      ...prev,
+      options: [
+        ...prev.options,
+        {
+          tierTitle: "",
+          depositAmount: "",
+          bonusAmount: "",
+          isFull: false,
+        },
+      ],
+    }));
+  }
+  
+  function removeTemplateOption(index) {
+    setTemplateForm((prev) => {
+      if (prev.options.length <= 1) {
+        toast.error("At least one package option is required");
+        return prev;
+      }
+  
+      return {
+        ...prev,
+        options: prev.options.filter((_, i) => i !== index),
+      };
+    });
+  }
+
   function closeCreateModal() {
     if (creating) return;
     setCreateModalOpen(false);
@@ -427,10 +534,6 @@ export default function TargetedBonusOffers() {
     }
 
     for (const option of cleanOptions) {
-      if (eventType === "entrepreneur" && !option.tierTitle) {
-        toast.error("Each entrepreneur package needs a title");
-        return;
-      }
 
       if (!Number.isFinite(option.depositAmount) || option.depositAmount <= 0) {
         toast.error("Each deposit amount must be more than 0");
@@ -475,6 +578,66 @@ export default function TargetedBonusOffers() {
       toast.error(err.message || "Failed to create offer");
     } finally {
       setCreating(false);
+    }
+  }
+
+  async function submitTemplate(e) {
+    e.preventDefault();
+  
+    const title = String(templateForm.title || "").trim();
+    const description = String(templateForm.description || "").trim();
+  
+    if (!title) {
+      toast.error("Title is required");
+      return;
+    }
+  
+    if (!description) {
+      toast.error("Description is required");
+      return;
+    }
+  
+    for (const option of cleanTemplateOptions) {
+      if (!option.tierTitle) {
+        toast.error("Each entrepreneur package needs a title");
+        return;
+      }
+  
+      if (!Number.isFinite(option.depositAmount) || option.depositAmount <= 0) {
+        toast.error("Each deposit amount must be more than 0");
+        return;
+      }
+  
+      if (!Number.isFinite(option.bonusAmount) || option.bonusAmount < 0) {
+        toast.error("Each bonus amount must be 0 or more");
+        return;
+      }
+    }
+  
+    setTemplateSaving(true);
+  
+    try {
+      await fetchJSON(
+        `${API_BASE}/api/admin/bonus-offer-templates/entrepreneur`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title,
+            description,
+            options: cleanTemplateOptions,
+          }),
+        }
+      );
+  
+      toast.success("Entrepreneur package saved");
+      setTemplateModalOpen(false);
+    } catch (err) {
+      toast.error(err.message || "Failed to save entrepreneur package");
+    } finally {
+      setTemplateSaving(false);
     }
   }
 
@@ -675,7 +838,9 @@ export default function TargetedBonusOffers() {
                 {eventConfig.recordsTitle}
               </div>
               <div className={`mt-1 text-xs ${mutedText}`}>
-                View created offers and user reserved selections for this event.
+                {eventType === "entrepreneur"
+                  ? "Entrepreneur offers are automatically created after a user's first approved withdrawal."
+                  : "View created offers and user reserved selections for this event."}
               </div>
             </div>
 
@@ -757,13 +922,23 @@ export default function TargetedBonusOffers() {
                 Reset
               </button>
 
-              <button
-                type="button"
-                onClick={openCreateModal}
-                className={primaryButtonClass}
-              >
-                {eventConfig.createButton}
-              </button>
+              {eventType !== "entrepreneur" ? (
+                <button
+                  type="button"
+                  onClick={openCreateModal}
+                  className={primaryButtonClass}
+                >
+                  {eventConfig.createButton}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={openTemplateModal}
+                  className={primaryButtonClass}
+                >
+                  Presaved Entrepreneur Package
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -1269,6 +1444,228 @@ export default function TargetedBonusOffers() {
                   className={primaryButtonClass}
                 >
                   {creating ? "Creating..." : eventConfig.submitText}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      ) : null}
+
+      {templateModalOpen ? (
+        <div
+          className={modalOverlayClass}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) closeTemplateModal();
+          }}
+        >
+          <div className={modalGlowClass} />
+      
+          <form
+            onSubmit={submitTemplate}
+            className={`relative z-10 flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border shadow-2xl ${
+              isDark
+                ? "border-white/10 bg-[#0b1220]/90"
+                : "border-gray-200 bg-white"
+            }`}
+          >
+            <div
+              className={`flex items-start justify-between gap-3 px-5 py-4 ${
+                isDark ? "border-b border-white/10" : "border-b border-gray-200"
+              }`}
+            >
+              <div>
+                <div
+                  className={
+                    isDark
+                      ? "text-base font-semibold text-white"
+                      : "text-base font-semibold text-gray-900"
+                  }
+                >
+                  Presaved Entrepreneur Package
+                </div>
+      
+                <div
+                  className={
+                    isDark
+                      ? "mt-1 text-xs text-white/50"
+                      : "mt-1 text-xs text-gray-500"
+                  }
+                >
+                  This saved package will be copied into future automated entrepreneur offers.
+                </div>
+              </div>
+      
+              <button
+                type="button"
+                onClick={closeTemplateModal}
+                disabled={templateSaving}
+                className={
+                  isDark
+                    ? "rounded-xl border border-white/10 bg-white/5 px-2.5 py-2 text-xs text-white/70 hover:bg-white/10 disabled:opacity-50"
+                    : "rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-xs text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+                }
+              >
+                ✕
+              </button>
+            </div>
+      
+            <div className="flex-1 overflow-y-auto px-5 py-5">
+              {templateLoading ? (
+                <div className={`text-sm ${mutedText}`}>Loading package...</div>
+              ) : (
+                <div className="space-y-3">
+                  <div>
+                    <label className={`mb-1 block text-xs font-semibold ${softText}`}>
+                      Title
+                    </label>
+                    <input
+                      value={templateForm.title}
+                      onChange={(e) =>
+                        setTemplateForm((prev) => ({
+                          ...prev,
+                          title: e.target.value,
+                        }))
+                      }
+                      placeholder="Entrepreneur Application"
+                      className={inputClass}
+                    />
+                  </div>
+      
+                  <div>
+                    <label className={`mb-1 block text-xs font-semibold ${softText}`}>
+                      Description
+                    </label>
+                    <textarea
+                      value={templateForm.description}
+                      onChange={(e) =>
+                        setTemplateForm((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
+                      }
+                      placeholder="Pick a tier - Cash in - Get extra bonus."
+                      className={textareaClass}
+                    />
+                  </div>
+      
+                  <div>
+                    <div className="mb-2 flex items-center justify-between gap-2">
+                      <label className={`text-xs font-semibold ${softText}`}>
+                        Entrepreneur Packages
+                      </label>
+      
+                      <button
+                        type="button"
+                        onClick={addTemplateOption}
+                        className={buttonClass}
+                      >
+                        + Add
+                      </button>
+                    </div>
+      
+                    <div className="space-y-2">
+                      {templateForm.options.map((option, index) => (
+                        <div
+                          key={index}
+                          className={`grid gap-2 rounded-2xl border p-3 md:grid-cols-[1.2fr_1fr_1fr_auto_auto] ${
+                            isDark
+                              ? "border-white/10 bg-white/5"
+                              : "border-gray-200 bg-gray-50"
+                          }`}
+                        >
+                          <input
+                            value={option.tierTitle}
+                            onChange={(e) =>
+                              updateTemplateOption(index, "tierTitle", e.target.value)
+                            }
+                            placeholder="Package title"
+                            className={inputClass}
+                          />
+      
+                          <input
+                            type="number"
+                            min="0"
+                            value={option.depositAmount}
+                            onChange={(e) =>
+                              updateTemplateOption(
+                                index,
+                                "depositAmount",
+                                e.target.value
+                              )
+                            }
+                            placeholder="Deposit"
+                            className={inputClass}
+                          />
+      
+                          <input
+                            type="number"
+                            min="0"
+                            value={option.bonusAmount}
+                            onChange={(e) =>
+                              updateTemplateOption(index, "bonusAmount", e.target.value)
+                            }
+                            placeholder="Bonus"
+                            className={inputClass}
+                          />
+      
+                          <label
+                            className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs ${
+                              isDark
+                                ? "border-white/10 bg-white/5 text-white/70"
+                                : "border-gray-200 bg-white text-gray-700"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={Boolean(option.isFull)}
+                              onChange={(e) =>
+                                updateTemplateOption(index, "isFull", e.target.checked)
+                              }
+                            />
+                            FULL
+                          </label>
+      
+                          <button
+                            type="button"
+                            onClick={() => removeTemplateOption(index)}
+                            className={dangerButtonClass}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+      
+                    <div className={`mt-2 text-[11px] ${mutedText}`}>
+                      Future automated entrepreneur offers will use this saved package.
+                      Existing offers already created will not change.
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+      
+            <div
+              className={`border-t px-5 py-4 ${
+                isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-gray-50"
+              }`}
+            >
+              <div className="flex flex-col gap-2 md:flex-row md:justify-end">
+                <button
+                  type="button"
+                  onClick={closeTemplateModal}
+                  disabled={templateSaving}
+                  className={buttonClass}
+                >
+                  Cancel
+                </button>
+      
+                <button
+                  type="submit"
+                  disabled={templateLoading || templateSaving}
+                  className={primaryButtonClass}
+                >
+                  {templateSaving ? "Saving..." : "Save Entrepreneur Package"}
                 </button>
               </div>
             </div>
