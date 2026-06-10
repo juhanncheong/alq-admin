@@ -1268,7 +1268,7 @@ export default function AdminChat() {
 
     try {
       const data = await authedJSON(
-        `${API_BASE}/api/chat/conversations`,
+        `${API_BASE}/api/chat/conversations?limit=80&scanLimit=2000`,
         {},
         { logoutOn401: false },
       );
@@ -1660,7 +1660,7 @@ export default function AdminChat() {
       userRead: false,
     };
 
-    setMessages((prev) => [...prev, optimistic]);
+    setMessages((prev) => [...prev, optimistic].slice(-50));
     setSocketAndCacheAfterLocalMessage(optimistic);
 
     socketRef.current?.emit("admin:message", {
@@ -1693,7 +1693,7 @@ export default function AdminChat() {
     setMessagesCache((prev) => {
       const key = String(msg.userId);
       const existing = Array.isArray(prev[key]) ? prev[key] : [];
-      const nextMessages = [...existing, msg];
+      const nextMessages = [...existing, msg].slice(-50);
 
       const next = {
         ...prev,
@@ -1770,7 +1770,7 @@ export default function AdminChat() {
           : `${API_BASE}${data.messageData.imageUrl}`,
       };
 
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) => [...prev, msg].slice(-50));
       setSocketAndCacheAfterLocalMessage(msg);
       socketRef.current?.emit("chat:imageSent", msg);
       loadConvos({ silent: true });
@@ -1864,14 +1864,12 @@ export default function AdminChat() {
     const qq = q.trim();
 
     const filtered = (convosMerged || []).filter((c) => {
-      const cachedMessages = messagesCache[String(c.userId)] || [];
-
       const matchesTab =
         activeChatTabId === "all"
           ? true
           : String(c.chatTabId || "") === String(activeChatTabId);
 
-      return matchesTab && conversationMatchesSearch(c, qq, cachedMessages);
+      return matchesTab && conversationMatchesSearch(c, qq, []);
     });
 
     filtered.sort((a, b) => {
@@ -1889,7 +1887,7 @@ export default function AdminChat() {
     });
 
     return filtered;
-  }, [convosMerged, unreadMap, q, pinnedChats, messagesCache, activeChatTabId]);
+  }, [convosMerged, unreadMap, q, pinnedChats, activeChatTabId]);
 
   const groupedConvos = useMemo(() => {
     const unread = [];
@@ -1977,19 +1975,6 @@ export default function AdminChat() {
   const messageItems = useMemo(() => buildMessageItems(messages), [messages]);
 
   useEffect(() => {
-    if (!activeUserId) return;
-
-    setMessagesCache((prev) => {
-      const next = {
-        ...prev,
-        [String(activeUserId)]: messages || [],
-      };
-      saveAdminChatMessagesCache(next);
-      return next;
-    });
-  }, [messages, activeUserId]);
-
-  useEffect(() => {
     // Search only current conversation list fields:
     // uid, phone number, userId, nickname, last message.
     // Do not auto-load all users' messages while typing.
@@ -2058,7 +2043,7 @@ export default function AdminChat() {
 
             const next = {
               ...prev,
-              [key]: replaced,
+              [key]: replaced.slice(-50),
             };
 
             saveAdminChatMessagesCache(next);
@@ -2067,7 +2052,7 @@ export default function AdminChat() {
 
           const next = {
             ...prev,
-            [key]: [...existing, msg],
+            [key]: [...existing, msg].slice(-50),
           };
 
           saveAdminChatMessagesCache(next);
@@ -2141,7 +2126,7 @@ export default function AdminChat() {
             return prev;
           }
 
-          return [...prev, msg];
+          return [...prev, msg].slice(-50);
         });
       }
     });
