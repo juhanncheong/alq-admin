@@ -79,7 +79,7 @@ function formatDayLabel(v) {
   const todayStart = new Date(
     today.getFullYear(),
     today.getMonth(),
-    today.getDate()
+    today.getDate(),
   ).getTime();
 
   const diffDays = Math.floor((todayStart - start) / 86400000);
@@ -100,7 +100,7 @@ function saveUnreadMap(map) {
   window.dispatchEvent(
     new CustomEvent("admin-unread-updated", {
       detail: map || {},
-    })
+    }),
   );
 }
 
@@ -132,7 +132,7 @@ function saveAdminChatUserCache(map) {
 function loadAdminChatMessagesCache() {
   try {
     return JSON.parse(
-      localStorage.getItem("admin_chat_messages_cache") || "{}"
+      localStorage.getItem("admin_chat_messages_cache") || "{}",
     );
   } catch {
     return {};
@@ -140,12 +140,34 @@ function loadAdminChatMessagesCache() {
 }
 
 function saveAdminChatMessagesCache(map) {
-  localStorage.setItem("admin_chat_messages_cache", JSON.stringify(map || {}));
+  try {
+    const safe = {};
+
+    for (const [userId, messages] of Object.entries(map || {})) {
+      if (!Array.isArray(messages)) continue;
+
+      // Keep only latest 50 messages per user in browser cache
+      safe[userId] = messages.slice(-50);
+    }
+
+    localStorage.setItem("admin_chat_messages_cache", JSON.stringify(safe));
+  } catch (e) {
+    console.warn("Failed to save admin chat messages cache:", e);
+
+    // Prevent blank page if localStorage gets too large/corrupted
+    try {
+      localStorage.removeItem("admin_chat_messages_cache");
+    } catch {
+      // ignore
+    }
+  }
 }
 
 function loadAdminChatConvosCache() {
   try {
-    const raw = JSON.parse(localStorage.getItem("admin_chat_convos_cache") || "[]");
+    const raw = JSON.parse(
+      localStorage.getItem("admin_chat_convos_cache") || "[]",
+    );
     return Array.isArray(raw) ? raw : [];
   } catch {
     return [];
@@ -155,7 +177,7 @@ function loadAdminChatConvosCache() {
 function saveAdminChatConvosCache(conversations) {
   localStorage.setItem(
     "admin_chat_convos_cache",
-    JSON.stringify(conversations || [])
+    JSON.stringify(conversations || []),
   );
 }
 
@@ -191,7 +213,7 @@ function normalizePresence(payload) {
   if (!payload || typeof payload !== "object") return null;
 
   const userId = String(
-    payload.userId || payload.id || payload._id || payload.uid || ""
+    payload.userId || payload.id || payload._id || payload.uid || "",
   ).trim();
 
   if (!userId) return null;
@@ -286,12 +308,7 @@ function getConversationLastSender(c, cachedMessages = []) {
 function getConversationLastType(c, cachedMessages = []) {
   const cachedLast = getLastMessageFromCache(cachedMessages);
 
-  if (
-    c?.lastMessageType ||
-    c?.lastType ||
-    c?.messageType ||
-    cachedLast?.type
-  ) {
+  if (c?.lastMessageType || c?.lastType || c?.messageType || cachedLast?.type) {
     return (
       c?.lastMessageType ||
       c?.lastType ||
@@ -400,11 +417,7 @@ function Modal({
   if (!open) return null;
 
   const maxWidth =
-    size === "2xl"
-      ? "max-w-2xl"
-      : size === "3xl"
-      ? "max-w-3xl"
-      : "max-w-xl";
+    size === "2xl" ? "max-w-2xl" : size === "3xl" ? "max-w-3xl" : "max-w-xl";
 
   return (
     <div
@@ -417,9 +430,7 @@ function Modal({
     >
       <div
         className={`absolute inset-0 ${
-          theme === "dark"
-            ? "bg-black/75"
-            : "bg-slate-950/45"
+          theme === "dark" ? "bg-black/75" : "bg-slate-950/45"
         } backdrop-blur-xl`}
       />
 
@@ -572,10 +583,10 @@ export default function AdminChat() {
   const [convos, setConvos] = useState(() => loadAdminChatConvosCache());
   const [usersCache, setUsersCache] = useState([]);
   const [userInfoCache, setUserInfoCache] = useState(() =>
-    loadAdminChatUserCache()
+    loadAdminChatUserCache(),
   );
   const [messagesCache, setMessagesCache] = useState(() =>
-    loadAdminChatMessagesCache()
+    loadAdminChatMessagesCache(),
   );
   const [loadingUsers, setLoadingUsers] = useState(false);
 
@@ -587,7 +598,9 @@ export default function AdminChat() {
   const [savingEdit, setSavingEdit] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [historyMessage, setHistoryMessage] = useState(null);
-  const [draftsCache, setDraftsCache] = useState(() => loadAdminChatDraftsCache());
+  const [draftsCache, setDraftsCache] = useState(() =>
+    loadAdminChatDraftsCache(),
+  );
   const [loadingConvos, setLoadingConvos] = useState(() => {
     return loadAdminChatConvosCache().length === 0;
   });
@@ -605,7 +618,7 @@ export default function AdminChat() {
       return {};
     }
   });
-  
+
   useEffect(() => {
     saveUnreadMap(unreadMap);
   }, [unreadMap]);
@@ -667,7 +680,7 @@ export default function AdminChat() {
 
   useEffect(() => {
     if (!emojiPickerOpen) return;
-  
+
     function handleClickOutside(e) {
       if (
         emojiPickerRef.current &&
@@ -676,9 +689,9 @@ export default function AdminChat() {
         setEmojiPickerOpen(false);
       }
     }
-  
+
     document.addEventListener("mousedown", handleClickOutside);
-  
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -726,18 +739,16 @@ export default function AdminChat() {
     function handleSpaceFocus(e) {
       if (e.code !== "Space") return;
       if (!activeUserId) return;
-  
+
       const activeEl = document.activeElement;
       const tag = activeEl?.tagName?.toLowerCase();
-  
+
       const isTyping =
-        tag === "input" ||
-        tag === "textarea" ||
-        activeEl?.isContentEditable;
-  
+        tag === "input" || tag === "textarea" || activeEl?.isContentEditable;
+
       // Don't steal spacebar when already typing
       if (isTyping) return;
-  
+
       // Don't trigger inside modals / previews
       if (
         previewOpen ||
@@ -751,14 +762,14 @@ export default function AdminChat() {
       ) {
         return;
       }
-  
+
       e.preventDefault();
-  
+
       composerRef.current?.focus();
     }
-  
+
     document.addEventListener("keydown", handleSpaceFocus);
-  
+
     return () => {
       document.removeEventListener("keydown", handleSpaceFocus);
     };
@@ -793,27 +804,27 @@ export default function AdminChat() {
   function isNearBottom() {
     const el = listRef.current;
     if (!el) return true;
-  
+
     const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
     return distanceFromBottom < 100;
   }
-  
+
   function scrollMessagesToBottom({ smooth = false } = {}) {
     const el = listRef.current;
     if (!el) return;
-  
+
     el.scrollTo({
       top: el.scrollHeight,
       behavior: smooth ? "smooth" : "auto",
     });
-  
+
     shouldStickToBottomRef.current = true;
     setShowJumpToLatest(false);
   }
-  
+
   function handleMessagesScroll() {
     const nearBottom = isNearBottom();
-  
+
     shouldStickToBottomRef.current = nearBottom;
     setShowJumpToLatest(Boolean(activeUserId) && !nearBottom);
   }
@@ -838,10 +849,10 @@ export default function AdminChat() {
     const arr = Array.isArray(payload)
       ? payload
       : Array.isArray(payload?.users)
-      ? payload.users
-      : Array.isArray(payload?.list)
-      ? payload.list
-      : [];
+        ? payload.users
+        : Array.isArray(payload?.list)
+          ? payload.list
+          : [];
 
     if (!arr.length) return;
 
@@ -888,14 +899,13 @@ export default function AdminChat() {
   }
 
   function addEmoji(emojiData) {
-    const emoji =
-      typeof emojiData === "string" ? emojiData : emojiData?.emoji;
-  
+    const emoji = typeof emojiData === "string" ? emojiData : emojiData?.emoji;
+
     if (!emoji) return;
-  
+
     setText((prev) => `${prev}${emoji}`);
     setEmojiPickerOpen(false);
-  
+
     setTimeout(() => {
       composerRef.current?.focus();
       resizeComposer();
@@ -904,14 +914,14 @@ export default function AdminChat() {
 
   async function loadAdminHotkeys() {
     setHotkeysLoading(true);
-  
+
     try {
       const data = await authedJSON(
         `${API_BASE}/api/chat/admin-hotkeys`,
         {},
-        { logoutOn401: false }
+        { logoutOn401: false },
       );
-  
+
       setHotkeys(Array.isArray(data.hotkeys) ? data.hotkeys : []);
     } catch (e) {
       setError(e.message || "Failed to load hotkeys");
@@ -925,26 +935,26 @@ export default function AdminChat() {
       const data = await authedJSON(
         `${API_BASE}/api/chat/admin-tabs`,
         {},
-        { logoutOn401: false }
+        { logoutOn401: false },
       );
-  
+
       setChatTabs(Array.isArray(data.tabs) ? data.tabs : []);
     } catch (e) {
       setError(e.message || "Failed to load chat tabs");
     }
   }
-  
+
   async function createChatTab(nameOverride = "") {
     const name = String(nameOverride || newTabName || "").trim();
-  
+
     if (!name) {
       setError("Tab name is required.");
       return;
     }
-  
+
     setCreatingTab(true);
     setError("");
-  
+
     try {
       const data = await authedJSON(
         `${API_BASE}/api/chat/admin-tabs`,
@@ -953,9 +963,9 @@ export default function AdminChat() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name }),
         },
-        { logoutOn401: false }
+        { logoutOn401: false },
       );
-  
+
       if (data.tab) {
         setChatTabs((prev) => [...prev, data.tab]);
         setActiveChatTabId(String(data.tab.id));
@@ -973,13 +983,13 @@ export default function AdminChat() {
     setNewTabName("");
     setCreateTabModalOpen(true);
   }
-  
+
   async function moveConversationToTab(userId, chatTabId) {
     if (!userId) return;
-  
+
     try {
       const cleanTabId = chatTabId === "all" ? null : chatTabId;
-  
+
       const data = await authedJSON(
         `${API_BASE}/api/chat/conversations/${userId}/tab`,
         {
@@ -987,52 +997,52 @@ export default function AdminChat() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ chatTabId: cleanTabId }),
         },
-        { logoutOn401: false }
+        { logoutOn401: false },
       );
-  
+
       const nextTabId = data?.conversation?.chatTabId || null;
-  
+
       setConvos((prev) =>
         prev.map((c) =>
           String(c.userId) === String(userId)
             ? { ...c, chatTabId: nextTabId }
-            : c
-        )
+            : c,
+        ),
       );
     } catch (e) {
       setError(e.message || "Failed to move conversation");
     }
   }
-  
+
   function resetHotkeyForm() {
     setHotkeyLabel("");
     setHotkeyText("");
     setEditingHotkeyId("");
   }
-  
+
   function startEditHotkey(item) {
     setEditingHotkeyId(item.id);
     setHotkeyLabel(item.label || "");
     setHotkeyText(item.text || "");
   }
-  
+
   async function saveHotkey() {
     const label = hotkeyLabel.trim();
     const textValue = hotkeyText.trim();
-  
+
     if (!label) {
       setError("Hotkey label is required.");
       return;
     }
-  
+
     if (!textValue) {
       setError("Hotkey text is required.");
       return;
     }
-  
+
     setHotkeySaving(true);
     setError("");
-  
+
     try {
       if (editingHotkeyId) {
         const data = await authedJSON(
@@ -1045,13 +1055,13 @@ export default function AdminChat() {
               text: textValue,
             }),
           },
-          { logoutOn401: false }
+          { logoutOn401: false },
         );
-  
+
         const updated = data.hotkey;
-  
+
         setHotkeys((prev) =>
-          prev.map((h) => (String(h.id) === String(updated.id) ? updated : h))
+          prev.map((h) => (String(h.id) === String(updated.id) ? updated : h)),
         );
       } else {
         const data = await authedJSON(
@@ -1065,14 +1075,14 @@ export default function AdminChat() {
               enabled: true,
             }),
           },
-          { logoutOn401: false }
+          { logoutOn401: false },
         );
-  
+
         if (data.hotkey) {
           setHotkeys((prev) => [...prev, data.hotkey]);
         }
       }
-  
+
       resetHotkeyForm();
     } catch (e) {
       setError(e.message || "Failed to save hotkey");
@@ -1080,10 +1090,10 @@ export default function AdminChat() {
       setHotkeySaving(false);
     }
   }
-  
+
   async function toggleHotkeyEnabled(item) {
     if (!item?.id) return;
-  
+
     try {
       const data = await authedJSON(
         `${API_BASE}/api/chat/admin-hotkeys/${item.id}`,
@@ -1094,33 +1104,33 @@ export default function AdminChat() {
             enabled: item.enabled === false,
           }),
         },
-        { logoutOn401: false }
+        { logoutOn401: false },
       );
-  
+
       const updated = data.hotkey;
-  
+
       setHotkeys((prev) =>
-        prev.map((h) => (String(h.id) === String(updated.id) ? updated : h))
+        prev.map((h) => (String(h.id) === String(updated.id) ? updated : h)),
       );
     } catch (e) {
       setError(e.message || "Failed to update hotkey");
     }
   }
-  
+
   async function deleteHotkey(id) {
     if (!id) return;
-  
+
     try {
       await authedJSON(
         `${API_BASE}/api/chat/admin-hotkeys/${id}`,
         {
           method: "DELETE",
         },
-        { logoutOn401: false }
+        { logoutOn401: false },
       );
-  
+
       setHotkeys((prev) => prev.filter((h) => String(h.id) !== String(id)));
-  
+
       if (String(editingHotkeyId) === String(id)) {
         resetHotkeyForm();
       }
@@ -1171,7 +1181,7 @@ export default function AdminChat() {
       await authedJSON(
         `${API_BASE}/api/chat/conversations/${userId}/read-admin`,
         { method: "PATCH" },
-        { logoutOn401: false }
+        { logoutOn401: false },
       );
     } catch (e) {
       console.error("Failed to mark conversation as read:", e);
@@ -1193,7 +1203,7 @@ export default function AdminChat() {
       const data = await authedJSON(
         `${API_BASE}/api/admin/users`,
         {},
-        { logoutOn401: false }
+        { logoutOn401: false },
       );
       const users = data.users || [];
       setUsersCache(users);
@@ -1209,7 +1219,8 @@ export default function AdminChat() {
         nextUserInfoCache[userId] = {
           ...(userInfoCache[userId] || {}),
           uid: u?.uid || userInfoCache[userId]?.uid || "",
-          phoneNumber: u?.phoneNumber || userInfoCache[userId]?.phoneNumber || "",
+          phoneNumber:
+            u?.phoneNumber || userInfoCache[userId]?.phoneNumber || "",
           nickname: userInfoCache[userId]?.nickname || "",
         };
 
@@ -1252,44 +1263,44 @@ export default function AdminChat() {
         return convos.length === 0 ? true : prev;
       });
     }
-  
+
     setError("");
-  
+
     try {
       const data = await authedJSON(
         `${API_BASE}/api/chat/conversations`,
         {},
-        { logoutOn401: false }
+        { logoutOn401: false },
       );
-  
+
       const conversations = data.conversations || [];
-  
+
       setConvos(conversations);
       saveAdminChatConvosCache(conversations);
-  
+
       const nextUnreadMap = buildUnreadMapFromConversations(conversations);
       syncUnreadMap(nextUnreadMap);
-  
+
       const nextOnline = {};
       const nextLastSeen = {};
-  
+
       for (const c of conversations) {
         const userId = String(c?.userId || "");
         if (!userId) continue;
-  
+
         if (typeof c?.isOnline !== "undefined") {
           nextOnline[userId] = Boolean(c.isOnline);
         }
-  
+
         if (c?.lastSeen) {
           nextLastSeen[userId] = c.lastSeen;
         }
       }
-  
+
       if (Object.keys(nextOnline).length) {
         setOnlineMap((prev) => ({ ...prev, ...nextOnline }));
       }
-  
+
       if (Object.keys(nextLastSeen).length) {
         setLastSeenMap((prev) => ({ ...prev, ...nextLastSeen }));
       }
@@ -1304,17 +1315,17 @@ export default function AdminChat() {
 
   async function loadNickname(userId) {
     if (!userId) return;
-  
+
     try {
       const data = await authedJSON(
         `${API_BASE}/api/chat/admin-nickname/${userId}`,
         {},
-        { logoutOn401: false }
+        { logoutOn401: false },
       );
-  
+
       const loadedNickname = data?.nickname || "";
       setNickname(loadedNickname);
-  
+
       setUserInfoCache((prev) => {
         const key = String(userId);
         const next = {
@@ -1324,17 +1335,17 @@ export default function AdminChat() {
             nickname: loadedNickname,
           },
         };
-  
+
         saveAdminChatUserCache(next);
         return next;
       });
-  
+
       setConvos((prev) =>
         prev.map((c) =>
           String(c.userId) === String(userId)
             ? { ...c, nickname: loadedNickname }
-            : c
-        )
+            : c,
+        ),
       );
     } catch {
       setNickname("");
@@ -1344,7 +1355,9 @@ export default function AdminChat() {
   async function saveNickname() {
     if (!activeUserId) return;
 
-    const cleanNickname = String(nicknameDraft || "").trim().slice(0, 40);
+    const cleanNickname = String(nicknameDraft || "")
+      .trim()
+      .slice(0, 40);
 
     setNickSaving(true);
     setError("");
@@ -1357,7 +1370,7 @@ export default function AdminChat() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ nickname: cleanNickname }),
         },
-        { logoutOn401: false }
+        { logoutOn401: false },
       );
 
       const savedNickname = data?.nickname || "";
@@ -1384,8 +1397,8 @@ export default function AdminChat() {
         prev.map((c) =>
           String(c.userId) === String(activeUserId)
             ? { ...c, nickname: savedNickname }
-            : c
-        )
+            : c,
+        ),
       );
 
       loadConvos();
@@ -1419,9 +1432,9 @@ export default function AdminChat() {
 
     try {
       const data = await authedJSON(
-        `${API_BASE}/api/chat/messages/${key}`,
+        `${API_BASE}/api/chat/messages/${key}?limit=50`,
         {},
-        { logoutOn401: false }
+        { logoutOn401: false },
       );
       const nextMessages = data.messages || [];
       setMessages(nextMessages);
@@ -1444,8 +1457,8 @@ export default function AdminChat() {
 
       setConvos((prev) =>
         prev.map((c) =>
-          String(c.userId) === key ? { ...c, unreadCount: 0 } : c
-        )
+          String(c.userId) === key ? { ...c, unreadCount: 0 } : c,
+        ),
       );
     } catch (e) {
       setMessages((prev) => prev || []);
@@ -1481,21 +1494,21 @@ export default function AdminChat() {
       setError("Please wait until the message is fully sent before editing.");
       return;
     }
-  
+
     setEditingMessage(message);
     setText(message.message || "");
-  
+
     setTimeout(() => {
       composerRef.current?.focus();
       resizeComposer();
     }, 0);
   }
-  
+
   function cancelEditingMessage() {
     setEditingMessage(null);
     setText("");
     setSlashIndex(0);
-  
+
     if (activeUserId) {
       setDraftsCache((prev) => {
         const next = { ...prev };
@@ -1504,54 +1517,56 @@ export default function AdminChat() {
         return next;
       });
     }
-  
+
     setTimeout(() => resizeComposer(), 0);
   }
-  
+
   function openEditHistory(message) {
     if (!message?.edited) return;
     setHistoryMessage(message);
     setHistoryModalOpen(true);
   }
-  
+
   function updateMessageEverywhere(updatedMessage) {
     if (!updatedMessage?.id) return;
-  
+
     setMessages((prev) =>
       prev.map((m) =>
         String(m.id) === String(updatedMessage.id)
           ? { ...m, ...updatedMessage }
-          : m
-      )
+          : m,
+      ),
     );
-  
+
     setMessagesCache((prev) => {
       const key = String(updatedMessage.userId || activeUserId || "");
       if (!key) return prev;
-  
+
       const existing = Array.isArray(prev[key]) ? prev[key] : [];
-  
+
       const updated = existing.map((m) =>
         String(m.id) === String(updatedMessage.id)
           ? { ...m, ...updatedMessage }
-          : m
+          : m,
       );
-  
+
       const next = {
         ...prev,
         [key]: updated,
       };
-  
+
       saveAdminChatMessagesCache(next);
       return next;
     });
-  
+
     setConvos((prev) =>
       prev.map((c) => {
-        if (String(c.userId) !== String(updatedMessage.userId || activeUserId)) {
+        if (
+          String(c.userId) !== String(updatedMessage.userId || activeUserId)
+        ) {
           return c;
         }
-  
+
         return {
           ...c,
           lastMessage:
@@ -1563,23 +1578,23 @@ export default function AdminChat() {
           lastMessageSender: updatedMessage.sender,
           lastMessageType: updatedMessage.type || "text",
         };
-      })
+      }),
     );
   }
 
   async function saveEditedMessage() {
     const msg = text.trim();
-  
+
     if (!msg || !editingMessage?.id) return;
-  
+
     if (msg === String(editingMessage.message || "").trim()) {
       cancelEditingMessage();
       return;
     }
-  
+
     setSavingEdit(true);
     setError("");
-  
+
     try {
       const data = await authedJSON(
         `${API_BASE}/api/chat/messages/${editingMessage.id}/edit`,
@@ -1588,28 +1603,28 @@ export default function AdminChat() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: msg }),
         },
-        { logoutOn401: false }
+        { logoutOn401: false },
       );
-  
+
       const updatedMessage = data.messageData;
-  
+
       if (updatedMessage) {
         updateMessageEverywhere(updatedMessage);
       } else {
         await openChat(activeUserId);
       }
-  
+
       setEditingMessage(null);
       setText("");
       setSlashIndex(0);
-  
+
       setDraftsCache((prev) => {
         const next = { ...prev };
         delete next[String(activeUserId)];
         saveAdminChatDraftsCache(next);
         return next;
       });
-  
+
       setTimeout(() => resizeComposer(), 0);
     } catch (e) {
       setError(e.message || "Failed to edit message");
@@ -1695,13 +1710,14 @@ export default function AdminChat() {
 
         return {
           ...c,
-          lastMessage: msg.type === "image" ? msg.message || "Image" : msg.message,
+          lastMessage:
+            msg.type === "image" ? msg.message || "Image" : msg.message,
           lastTime: msg.createdAt,
           lastSender: msg.sender,
           lastMessageSender: msg.sender,
           lastMessageType: msg.type || "text",
         };
-      })
+      }),
     );
   }
 
@@ -1773,43 +1789,10 @@ export default function AdminChat() {
   }
 
   async function hydrateSearchMessagesCache(query) {
-    const qq = query.trim();
-    if (qq.length < 2) return;
-    if (searchHydratingRef.current) return;
-
-    const missing = (convos || [])
-      .map((c) => String(c?.userId || ""))
-      .filter(Boolean)
-      .filter((userId) => !Array.isArray(messagesCache[userId]));
-
-    if (!missing.length) return;
-
-    searchHydratingRef.current = true;
-    setSearchingMessages(true);
-
-    try {
-      const nextCache = { ...messagesCache };
-
-      for (const userId of missing.slice(0, 40)) {
-        try {
-          const data = await authedJSON(
-            `${API_BASE}/api/chat/messages/${userId}`,
-            {},
-            { logoutOn401: false }
-          );
-
-          nextCache[userId] = data.messages || [];
-        } catch {
-          nextCache[userId] = [];
-        }
-      }
-
-      setMessagesCache(nextCache);
-      saveAdminChatMessagesCache(nextCache);
-    } finally {
-      searchHydratingRef.current = false;
-      setSearchingMessages(false);
-    }
+    // Disabled for performance.
+    // Old version loaded messages for up to 40 users while typing search,
+    // which can make MongoDB Atlas and the browser lag.
+    return;
   }
 
   const convosMerged = useMemo(() => {
@@ -1824,7 +1807,8 @@ export default function AdminChat() {
         ...c,
         nickname: c.nickname || cached.nickname || "",
         uid: c.uid || u?.uid || cached.uid || "",
-        phoneNumber: c.phoneNumber || u?.phoneNumber || cached.phoneNumber || "",
+        phoneNumber:
+          c.phoneNumber || u?.phoneNumber || cached.phoneNumber || "",
         isBanned: Boolean(c.isBanned ?? u?.isBanned),
         isOnline:
           typeof onlineMap[key] !== "undefined"
@@ -1837,7 +1821,8 @@ export default function AdminChat() {
 
   const activeConvo = useMemo(() => {
     return (
-      convosMerged.find((c) => String(c.userId) === String(activeUserId)) || null
+      convosMerged.find((c) => String(c.userId) === String(activeUserId)) ||
+      null
     );
   }, [convosMerged, activeUserId]);
 
@@ -1861,33 +1846,33 @@ export default function AdminChat() {
     const key = String(activeUserId || "");
     return {
       display:
-       nickname?.trim() ||
-       activeConvo?.nickname ||
-       userInfoCache[key]?.nickname ||
-       activeConvo?.uid ||
-       activeConvo?.phoneNumber ||
-       userInfoCache[key]?.uid ||
-       userInfoCache[key]?.phoneNumber ||
-       activeUserId ||
-       "-",
+        nickname?.trim() ||
+        activeConvo?.nickname ||
+        userInfoCache[key]?.nickname ||
+        activeConvo?.uid ||
+        activeConvo?.phoneNumber ||
+        userInfoCache[key]?.uid ||
+        userInfoCache[key]?.phoneNumber ||
+        activeUserId ||
+        "-",
       uid: activeConvo?.uid || userInfoCache[key]?.uid || "-",
       phone: activeConvo?.phoneNumber || userInfoCache[key]?.phoneNumber || "-",
     };
   }, [activeUserId, activeConvo, nickname, userInfoCache]);
 
   const filteredSortedConvos = useMemo(() => {
-   const qq = q.trim();
-  
-   const filtered = (convosMerged || []).filter((c) => {
-     const cachedMessages = messagesCache[String(c.userId)] || [];
-  
-     const matchesTab =
-       activeChatTabId === "all"
-         ? true
-         : String(c.chatTabId || "") === String(activeChatTabId);
-  
-     return matchesTab && conversationMatchesSearch(c, qq, cachedMessages);
-   });
+    const qq = q.trim();
+
+    const filtered = (convosMerged || []).filter((c) => {
+      const cachedMessages = messagesCache[String(c.userId)] || [];
+
+      const matchesTab =
+        activeChatTabId === "all"
+          ? true
+          : String(c.chatTabId || "") === String(activeChatTabId);
+
+      return matchesTab && conversationMatchesSearch(c, qq, cachedMessages);
+    });
 
     filtered.sort((a, b) => {
       const aPinned = pinnedChats.includes(String(a.userId)) ? 1 : 0;
@@ -1969,18 +1954,18 @@ export default function AdminChat() {
 
   const slashMatches = useMemo(() => {
     if (!text.startsWith("/")) return [];
-  
+
     const query = text.slice(1).trim().toLowerCase();
-  
+
     const enabledHotkeys = (hotkeys || []).filter(
-      (item) => item.enabled !== false
+      (item) => item.enabled !== false,
     );
-  
+
     if (!query) return enabledHotkeys;
-  
+
     return enabledHotkeys.filter((item) => {
       const label = String(item.label || "").toLowerCase();
-  
+
       // ✅ Only search hotkey label, not message text
       return label.includes(query);
     });
@@ -2005,27 +1990,15 @@ export default function AdminChat() {
   }, [messages, activeUserId]);
 
   useEffect(() => {
+    // Search only current conversation list fields:
+    // uid, phone number, userId, nickname, last message.
+    // Do not auto-load all users' messages while typing.
+    setSearchingMessages(false);
+
     if (searchHydrateTimerRef.current) {
       clearTimeout(searchHydrateTimerRef.current);
     }
-
-    const query = q.trim();
-
-    if (query.length < 2) {
-      setSearchingMessages(false);
-      return;
-    }
-
-    searchHydrateTimerRef.current = setTimeout(() => {
-      hydrateSearchMessagesCache(query);
-    }, 450);
-
-    return () => {
-      if (searchHydrateTimerRef.current) {
-        clearTimeout(searchHydrateTimerRef.current);
-      }
-    };
-  }, [q, convos.length]);
+  }, [q]);
 
   useEffect(() => {
     const token = getAdminToken();
@@ -2080,7 +2053,7 @@ export default function AdminChat() {
                     id: msg.id || m.id,
                     status: msg.status || m.status,
                   }
-                : m
+                : m,
             );
 
             const next = {
@@ -2142,7 +2115,7 @@ export default function AdminChat() {
               lastMessageSender: msg.sender,
               lastMessageType: msg.type || "text",
             };
-          })
+          }),
         );
       }
 
@@ -2150,7 +2123,7 @@ export default function AdminChat() {
         setMessages((prev) => {
           if (msg.clientId) {
             const idx = prev.findIndex(
-              (m) => String(m.id) === String(msg.clientId)
+              (m) => String(m.id) === String(msg.clientId),
             );
             if (idx !== -1) {
               const copy = [...prev];
@@ -2183,7 +2156,7 @@ export default function AdminChat() {
             return { ...m, status: status || m.status };
           }
           return m;
-        })
+        }),
       );
     });
 
@@ -2202,7 +2175,7 @@ export default function AdminChat() {
           }
 
           return m;
-        })
+        }),
       );
 
       setMessagesCache((prev) => {
@@ -2255,42 +2228,42 @@ export default function AdminChat() {
 
   const qUserId = params.get("userId") || "";
   const qOpen = params.get("open") || "";
-  
+
   useEffect(() => {
     let pendingUserId = "";
-  
+
     try {
       pendingUserId = localStorage.getItem("admin_chat_pending_user") || "";
     } catch {
       pendingUserId = "";
     }
-  
+
     const targetUserId = String(qUserId || pendingUserId || "").trim();
-  
+
     if (targetUserId) {
       const openKey = `${targetUserId}:${qOpen}`;
-  
+
       if (
         handledUrlOpenRef.current === openKey &&
         activeUserIdRef.current === targetUserId
       ) {
         return;
       }
-  
+
       handledUrlOpenRef.current = openKey;
-  
+
       try {
         localStorage.removeItem("admin_chat_pending_user");
       } catch {
         // ignore localStorage error
       }
-  
+
       openChat(targetUserId);
       return;
     }
-  
+
     const lastUserId = loadLastActiveChatUser();
-  
+
     if (lastUserId && !activeUserIdRef.current) {
       openChat(lastUserId);
     }
@@ -2298,7 +2271,7 @@ export default function AdminChat() {
 
   useEffect(() => {
     if (!activeUserId) return;
-  
+
     if (shouldStickToBottomRef.current) {
       setTimeout(() => {
         scrollMessagesToBottom({ smooth: false });
@@ -2325,102 +2298,102 @@ export default function AdminChat() {
 
   function openPendingImagePreview(file) {
     if (!file || !activeUserId) return;
-  
+
     if (!file.type?.startsWith("image/")) {
       setError("Only image files are allowed.");
       return;
     }
-  
+
     if (file.size > 5 * 1024 * 1024) {
       setError("Image is too large. Maximum size is 5MB.");
       return;
     }
-  
+
     if (pendingImageSrc) {
       URL.revokeObjectURL(pendingImageSrc);
     }
-  
+
     const objectUrl = URL.createObjectURL(file);
-  
+
     setPendingImageFile(file);
     setPendingImageSrc(objectUrl);
     setPendingImageModalOpen(true);
   }
-  
+
   function closePendingImagePreview() {
     if (pendingImageSrc) {
       URL.revokeObjectURL(pendingImageSrc);
     }
-  
+
     setPendingImageModalOpen(false);
     setPendingImageFile(null);
     setPendingImageSrc("");
-  
+
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   }
-  
+
   async function confirmSendPendingImage() {
     if (!pendingImageFile || !activeUserId) return;
-  
+
     const file = pendingImageFile;
-  
+
     closePendingImagePreview();
     await sendAdminImage(file);
   }
-  
+
   function openDeleteImageModal(message) {
     if (!message) return;
-  
+
     if (message.sender !== "admin" || message.type !== "image") {
       setError("Only admin-sent images can be deleted.");
       return;
     }
-  
+
     if (!message.id || String(message.id).startsWith("tmp_")) {
       setError("Please wait until the image is fully sent before deleting.");
       return;
     }
-  
+
     setImageToDelete(message);
     setDeleteImageModalOpen(true);
   }
-  
+
   function closeDeleteImageModal() {
     if (deletingImage) return;
-  
+
     setDeleteImageModalOpen(false);
     setImageToDelete(null);
   }
-  
+
   function removeImageEverywhere(messageId, userId) {
     const mid = String(messageId || "");
     const uid = String(userId || activeUserId || "");
-  
+
     if (!mid) return;
-  
+
     setMessages((prev) => prev.filter((m) => String(m.id) !== mid));
-  
+
     setMessagesCache((prev) => {
       const next = { ...prev };
-  
+
       if (uid && Array.isArray(next[uid])) {
         next[uid] = next[uid].filter((m) => String(m.id) !== mid);
       }
-  
+
       saveAdminChatMessagesCache(next);
       return next;
     });
-  
+
     setConvos((prev) =>
       prev.map((c) => {
         if (String(c.userId) !== uid) return c;
-  
+
         const cached = messagesCache[uid] || [];
         const remaining = cached.filter((m) => String(m.id) !== mid);
         const last = remaining[remaining.length - 1];
-  
+
         if (!last) {
           return {
             ...c,
@@ -2430,36 +2403,40 @@ export default function AdminChat() {
             lastMessageSender: "",
           };
         }
-  
+
         return {
           ...c,
-          lastMessage: last.type === "image" ? last.message || "Image" : last.message,
+          lastMessage:
+            last.type === "image" ? last.message || "Image" : last.message,
           lastTime: last.createdAt,
           lastSender: last.sender,
           lastMessageSender: last.sender,
           lastMessageType: last.type || "text",
         };
-      })
+      }),
     );
   }
-  
+
   async function confirmDeleteImage() {
     if (!imageToDelete?.id) return;
-  
+
     setDeletingImage(true);
     setError("");
-  
+
     try {
       const data = await authedJSON(
         `${API_BASE}/api/chat/messages/${imageToDelete.id}/image`,
         {
           method: "DELETE",
         },
-        { logoutOn401: false }
+        { logoutOn401: false },
       );
-  
-      removeImageEverywhere(data.messageId || imageToDelete.id, data.userId || imageToDelete.userId);
-  
+
+      removeImageEverywhere(
+        data.messageId || imageToDelete.id,
+        data.userId || imageToDelete.userId,
+      );
+
       setDeleteImageModalOpen(false);
       setImageToDelete(null);
       loadConvos({ silent: true });
@@ -2469,35 +2446,35 @@ export default function AdminChat() {
       setDeletingImage(false);
     }
   }
-  
+
   function handleImageFileSelected(e) {
     const file = e.target.files?.[0];
     if (!file) return;
-  
+
     openPendingImagePreview(file);
   }
 
   function handleComposerPaste(e) {
     const items = Array.from(e.clipboardData?.items || []);
     const imageItem = items.find((item) => item.type?.startsWith("image/"));
-  
+
     if (!imageItem) return;
-  
+
     if (!activeUserId) {
       setError("Select a user before sending an image.");
       return;
     }
-  
+
     const file = imageItem.getAsFile();
     if (!file) return;
-  
+
     e.preventDefault();
     openPendingImagePreview(file);
   }
 
   function getTabNameById(tabId) {
     if (!tabId) return "All";
-  
+
     const found = chatTabs.find((tab) => String(tab.id) === String(tabId));
     return found?.name || "All";
   }
@@ -2542,8 +2519,8 @@ export default function AdminChat() {
               ? "bg-white/10 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
               : "bg-gray-100 text-gray-900 shadow-[inset_0_0_0_1px_rgba(17,24,39,0.08)]"
             : theme === "dark"
-            ? "text-white/75 hover:bg-white/[0.055] hover:text-white"
-            : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+              ? "text-white/75 hover:bg-white/[0.055] hover:text-white"
+              : "text-gray-700 hover:bg-gray-50 hover:text-gray-900",
         )}
       >
         <div className="min-w-0">
@@ -2552,19 +2529,21 @@ export default function AdminChat() {
               <div className={`truncate text-xs font-bold ${strongText}`}>
                 {label}
               </div>
-    
+
               {unread > 0 ? (
                 <span className="inline-flex h-4 min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold leading-none text-white shadow-sm">
                   {unread > 99 ? "99+" : unread}
                 </span>
               ) : null}
             </div>
-    
+
             <div className="flex shrink-0 items-center gap-2">
-              <div className={`hidden shrink-0 text-[10px] sm:block ${mutedText}`}>
+              <div
+                className={`hidden shrink-0 text-[10px] sm:block ${mutedText}`}
+              >
                 {formatTime(c.lastTime)}
               </div>
-    
+
               <button
                 type="button"
                 onClick={(e) => {
@@ -2577,8 +2556,8 @@ export default function AdminChat() {
                       ? "text-white/80 hover:bg-white/10"
                       : "text-white/35 hover:bg-white/10 hover:text-white"
                     : isPinned
-                    ? "text-gray-800 hover:bg-gray-100"
-                    : "text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                      ? "text-gray-800 hover:bg-gray-100"
+                      : "text-gray-400 hover:bg-gray-100 hover:text-gray-700"
                 }`}
                 title={isPinned ? "Unpin chat" : "Pin chat"}
               >
@@ -2604,9 +2583,11 @@ export default function AdminChat() {
                   title="Move to tab"
                 >
                   <Folder className="h-3 w-3 shrink-0" />
-                  <span className="truncate">{getTabNameById(c.chatTabId)}</span>
+                  <span className="truncate">
+                    {getTabNameById(c.chatTabId)}
+                  </span>
                 </button>
-              
+
                 {moveMenuUserId === key ? (
                   <div
                     onClick={(e) => e.stopPropagation()}
@@ -2628,17 +2609,18 @@ export default function AdminChat() {
                             ? "bg-white/10 text-white"
                             : "bg-gray-100 text-gray-900"
                           : theme === "dark"
-                          ? "text-white/65 hover:bg-white/10 hover:text-white"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                            ? "text-white/65 hover:bg-white/10 hover:text-white"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                       }`}
                     >
                       <span>All</span>
                       {!c.chatTabId ? <span>✓</span> : null}
                     </button>
-              
+
                     {chatTabs.map((tab) => {
-                      const active = String(c.chatTabId || "") === String(tab.id);
-              
+                      const active =
+                        String(c.chatTabId || "") === String(tab.id);
+
                       return (
                         <button
                           key={tab.id}
@@ -2653,8 +2635,8 @@ export default function AdminChat() {
                                 ? "bg-white/10 text-white"
                                 : "bg-gray-100 text-gray-900"
                               : theme === "dark"
-                              ? "text-white/65 hover:bg-white/10 hover:text-white"
-                              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                ? "text-white/65 hover:bg-white/10 hover:text-white"
+                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                           }`}
                         >
                           <span className="truncate">{tab.name}</span>
@@ -2665,15 +2647,16 @@ export default function AdminChat() {
                   </div>
                 ) : null}
               </div>
-
             </div>
           </div>
-    
-          <div className={`mt-2 flex min-w-0 items-center gap-1.5 text-[11px] ${softText}`}>
+
+          <div
+            className={`mt-2 flex min-w-0 items-center gap-1.5 text-[11px] ${softText}`}
+          >
             {isImage ? (
               <ImageIcon className="h-3.5 w-3.5 shrink-0 opacity-70" />
             ) : null}
-    
+
             <span
               className={`shrink-0 font-semibold ${
                 theme === "dark" ? "text-white/55" : "text-gray-500"
@@ -2681,7 +2664,7 @@ export default function AdminChat() {
             >
               {lastSenderLabel}:
             </span>
-    
+
             <span className="min-w-0 truncate">
               {isImage && (!preview || preview === "Image") ? "Image" : preview}
             </span>
@@ -2689,257 +2672,269 @@ export default function AdminChat() {
         </div>
       </div>
     );
-   }
+  }
 
-   function renderHotkeySettingsPanel() {
-     return (
-       <div className="flex h-full min-h-0 flex-col gap-3">
-         <div className={`${cardClass} p-4`}>
-           <div className={`text-sm font-bold ${strongText}`}>
-             Hotkey Settings
-           </div>
-           <div className={`mt-1 text-[11px] ${mutedText}`}>
-             Add quick replies here. Admin can type / in chat to use them.
-           </div>
-         </div>
-   
-         <div className={`${cardClass} p-4`}>
-           <div className={`text-xs font-bold ${strongText}`}>
-             {editingHotkeyId ? "Edit Hotkey" : "Add Hotkey"}
-           </div>
-   
-           <div className="mt-3 space-y-3">
-             <input
-               value={hotkeyLabel}
-               onChange={(e) => setHotkeyLabel(e.target.value)}
-               placeholder="Label, example: Welcome"
-               className={inputClass}
-               maxLength={40}
-             />
-   
-             <textarea
-               value={hotkeyText}
-               onChange={(e) => setHotkeyText(e.target.value)}
-               placeholder="Message text..."
-               className={`${inputClass} min-h-[120px] resize-none`}
-               maxLength={2000}
-             />
-   
-             <div className="flex gap-2">
-               <button
-                 type="button"
-                 onClick={saveHotkey}
-                 disabled={hotkeySaving}
-                 className={`${primaryButtonClass} flex-1 disabled:opacity-50`}
-               >
-                 {hotkeySaving
-                   ? "Saving..."
-                   : editingHotkeyId
-                   ? "Save Changes"
-                   : "Add Hotkey"}
-               </button>
-   
-               {editingHotkeyId ? (
-                 <button
-                   type="button"
-                   onClick={resetHotkeyForm}
-                   className={buttonClass}
-                 >
-                   Cancel
-                 </button>
-               ) : null}
-             </div>
-           </div>
-         </div>
-   
-         <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-           {hotkeysLoading ? (
-             <div className={`${cardClass} p-4 text-xs ${mutedText}`}>
-               Loading hotkeys...
-             </div>
-           ) : hotkeys.length === 0 ? (
-             <div className={`${cardClass} p-4`}>
-               <div className={`text-xs font-semibold ${strongText}`}>
-                 No hotkeys yet
-               </div>
-               <div className={`mt-1 text-[11px] ${mutedText}`}>
-                 Add your first hotkey above.
-               </div>
-             </div>
-           ) : (
-             <div className="space-y-2">
-               {hotkeys.map((item) => (
-                 <div key={item.id} className={`${cardClass} p-3`}>
-                   <div className="flex items-start justify-between gap-2">
-                     <div className="min-w-0">
-                       <div className={`truncate text-xs font-bold ${strongText}`}>
-                         {item.label}
-                       </div>
-                       <div className={`mt-1 line-clamp-2 text-[11px] ${softText}`}>
-                         {item.text}
-                       </div>
-                       <div className={`mt-2 text-[10px] ${mutedText}`}>
-                         {item.enabled === false ? "Disabled" : "Enabled"}
-                       </div>
-                     </div>
-   
-                     <div className="flex shrink-0 gap-1">
-                       <button
-                         type="button"
-                         onClick={() => startEditHotkey(item)}
-                         className={`h-8 w-8 rounded-xl ${iconButtonClass}`}
-                         title="Edit hotkey"
-                       >
-                         <Pencil className="h-3.5 w-3.5" />
-                       </button>
-   
-                       <button
-                         type="button"
-                         onClick={() => deleteHotkey(item.id)}
-                         className={`h-8 w-8 rounded-xl ${iconButtonClass}`}
-                         title="Delete hotkey"
-                       >
-                         <Trash2 className="h-3.5 w-3.5" />
-                       </button>
-                     </div>
-                   </div>
-   
-                   <button
-                     type="button"
-                     onClick={() => toggleHotkeyEnabled(item)}
-                     className={`mt-3 w-full ${buttonClass}`}
-                   >
-                     {item.enabled === false ? "Enable" : "Disable"}
-                   </button>
-                 </div>
-               ))}
-             </div>
-           )}
-         </div>
-       </div>
-     );
-   }
+  function renderHotkeySettingsPanel() {
+    return (
+      <div className="flex h-full min-h-0 flex-col gap-3">
+        <div className={`${cardClass} p-4`}>
+          <div className={`text-sm font-bold ${strongText}`}>
+            Hotkey Settings
+          </div>
+          <div className={`mt-1 text-[11px] ${mutedText}`}>
+            Add quick replies here. Admin can type / in chat to use them.
+          </div>
+        </div>
 
-   function renderChatInfoPanel() {
-     if (!activeUserId) {
-       return (
-         <div className={`${cardClass} p-5 text-center`}>
-           <div
-             className={`mx-auto flex h-12 w-12 items-center justify-center rounded-2xl ${
-               theme === "dark"
-                 ? "bg-white/10 text-white/70"
-                 : "bg-gray-100 text-gray-600"
-             }`}
-           >
-             <BadgeInfo className="h-6 w-6" />
-           </div>
-   
-           <div className={`mt-3 text-sm font-bold ${strongText}`}>
-             No chat selected
-           </div>
-   
-           <div className={`mt-1 text-xs ${mutedText}`}>
-             Select a conversation first to view customer information.
-           </div>
-         </div>
-       );
-     }
-   
-     const key = String(activeUserId);
-     const unread = Number(unreadMap[key] || 0);
-     const isPinned = pinnedChats.includes(key);
-   
-     const infoRows = [
-       ["Display", activeIdentity.display],
-       ["UID", activeIdentity.uid],
-       ["Phone", activeIdentity.phone],
-       ["Status", activePresenceText],
-       ["Pinned", isPinned ? "Yes" : "No"],
-       ["Unread", unread],
-       ["Messages", messages.length],
-     ];
-   
-     return (
-       <div className="space-y-4">
-         <div className={`${cardClass} overflow-hidden p-5`}>
-           <div className="flex items-center gap-3">
-             <div
-               className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl ${
-                 theme === "dark"
-                   ? "bg-white/10 text-white"
-                   : "bg-gray-900 text-white"
-               }`}
-             >
-               <UserCircle className="h-8 w-8" />
-             </div>
-   
-             <div className="min-w-0">
-               <div className={`truncate text-base font-bold ${strongText}`}>
-                 {activeIdentity.display}
-               </div>
-   
-               <div className={`mt-1 flex items-center gap-2 text-xs ${mutedText}`}>
-                 <span
-                   className={`h-2 w-2 rounded-full ${
-                     activeConvo?.isOnline ? "bg-emerald-400" : "bg-gray-400"
-                   }`}
-                 />
-                 <span>{activePresenceText}</span>
-               </div>
-             </div>
-           </div>
-         </div>
-   
-         <div className="grid grid-cols-2 gap-3">
-           <div className={`${cardClass} p-4`}>
-             <div className={`text-[10px] font-bold uppercase tracking-wide ${mutedText}`}>
-               Messages
-             </div>
-             <div className={`mt-1 text-2xl font-bold ${strongText}`}>
-               {messages.length}
-             </div>
-           </div>
-   
-           <div className={`${cardClass} p-4`}>
-             <div className={`text-[10px] font-bold uppercase tracking-wide ${mutedText}`}>
-               Unread
-             </div>
-             <div className={`mt-1 text-2xl font-bold ${strongText}`}>
-               {unread}
-             </div>
-           </div>
-         </div>
-   
-         <div className={`${cardClass} overflow-hidden`}>
-           {infoRows.map(([label, value], index) => (
-             <div
-               key={label}
-               className={`flex items-center justify-between gap-4 px-4 py-3 text-xs ${
-                 index !== infoRows.length - 1
-                   ? theme === "dark"
-                     ? "border-b border-white/10"
-                     : "border-b border-gray-100"
-                   : ""
-               }`}
-             >
-               <div className={mutedText}>{label}</div>
-               <div className={`min-w-0 truncate text-right font-bold ${strongText}`}>
-                 {value || "-"}
-               </div>
-             </div>
-           ))}
-         </div>
-   
-         <button
-           type="button"
-           onClick={openNicknameModal}
-           className={`${primaryButtonClass} w-full`}
-         >
-           Edit Nickname
-         </button>
-       </div>
-     );
-   }
+        <div className={`${cardClass} p-4`}>
+          <div className={`text-xs font-bold ${strongText}`}>
+            {editingHotkeyId ? "Edit Hotkey" : "Add Hotkey"}
+          </div>
+
+          <div className="mt-3 space-y-3">
+            <input
+              value={hotkeyLabel}
+              onChange={(e) => setHotkeyLabel(e.target.value)}
+              placeholder="Label, example: Welcome"
+              className={inputClass}
+              maxLength={40}
+            />
+
+            <textarea
+              value={hotkeyText}
+              onChange={(e) => setHotkeyText(e.target.value)}
+              placeholder="Message text..."
+              className={`${inputClass} min-h-[120px] resize-none`}
+              maxLength={2000}
+            />
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={saveHotkey}
+                disabled={hotkeySaving}
+                className={`${primaryButtonClass} flex-1 disabled:opacity-50`}
+              >
+                {hotkeySaving
+                  ? "Saving..."
+                  : editingHotkeyId
+                    ? "Save Changes"
+                    : "Add Hotkey"}
+              </button>
+
+              {editingHotkeyId ? (
+                <button
+                  type="button"
+                  onClick={resetHotkeyForm}
+                  className={buttonClass}
+                >
+                  Cancel
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+          {hotkeysLoading ? (
+            <div className={`${cardClass} p-4 text-xs ${mutedText}`}>
+              Loading hotkeys...
+            </div>
+          ) : hotkeys.length === 0 ? (
+            <div className={`${cardClass} p-4`}>
+              <div className={`text-xs font-semibold ${strongText}`}>
+                No hotkeys yet
+              </div>
+              <div className={`mt-1 text-[11px] ${mutedText}`}>
+                Add your first hotkey above.
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {hotkeys.map((item) => (
+                <div key={item.id} className={`${cardClass} p-3`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div
+                        className={`truncate text-xs font-bold ${strongText}`}
+                      >
+                        {item.label}
+                      </div>
+                      <div
+                        className={`mt-1 line-clamp-2 text-[11px] ${softText}`}
+                      >
+                        {item.text}
+                      </div>
+                      <div className={`mt-2 text-[10px] ${mutedText}`}>
+                        {item.enabled === false ? "Disabled" : "Enabled"}
+                      </div>
+                    </div>
+
+                    <div className="flex shrink-0 gap-1">
+                      <button
+                        type="button"
+                        onClick={() => startEditHotkey(item)}
+                        className={`h-8 w-8 rounded-xl ${iconButtonClass}`}
+                        title="Edit hotkey"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => deleteHotkey(item.id)}
+                        className={`h-8 w-8 rounded-xl ${iconButtonClass}`}
+                        title="Delete hotkey"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => toggleHotkeyEnabled(item)}
+                    className={`mt-3 w-full ${buttonClass}`}
+                  >
+                    {item.enabled === false ? "Enable" : "Disable"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  function renderChatInfoPanel() {
+    if (!activeUserId) {
+      return (
+        <div className={`${cardClass} p-5 text-center`}>
+          <div
+            className={`mx-auto flex h-12 w-12 items-center justify-center rounded-2xl ${
+              theme === "dark"
+                ? "bg-white/10 text-white/70"
+                : "bg-gray-100 text-gray-600"
+            }`}
+          >
+            <BadgeInfo className="h-6 w-6" />
+          </div>
+
+          <div className={`mt-3 text-sm font-bold ${strongText}`}>
+            No chat selected
+          </div>
+
+          <div className={`mt-1 text-xs ${mutedText}`}>
+            Select a conversation first to view customer information.
+          </div>
+        </div>
+      );
+    }
+
+    const key = String(activeUserId);
+    const unread = Number(unreadMap[key] || 0);
+    const isPinned = pinnedChats.includes(key);
+
+    const infoRows = [
+      ["Display", activeIdentity.display],
+      ["UID", activeIdentity.uid],
+      ["Phone", activeIdentity.phone],
+      ["Status", activePresenceText],
+      ["Pinned", isPinned ? "Yes" : "No"],
+      ["Unread", unread],
+      ["Messages", messages.length],
+    ];
+
+    return (
+      <div className="space-y-4">
+        <div className={`${cardClass} overflow-hidden p-5`}>
+          <div className="flex items-center gap-3">
+            <div
+              className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl ${
+                theme === "dark"
+                  ? "bg-white/10 text-white"
+                  : "bg-gray-900 text-white"
+              }`}
+            >
+              <UserCircle className="h-8 w-8" />
+            </div>
+
+            <div className="min-w-0">
+              <div className={`truncate text-base font-bold ${strongText}`}>
+                {activeIdentity.display}
+              </div>
+
+              <div
+                className={`mt-1 flex items-center gap-2 text-xs ${mutedText}`}
+              >
+                <span
+                  className={`h-2 w-2 rounded-full ${
+                    activeConvo?.isOnline ? "bg-emerald-400" : "bg-gray-400"
+                  }`}
+                />
+                <span>{activePresenceText}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className={`${cardClass} p-4`}>
+            <div
+              className={`text-[10px] font-bold uppercase tracking-wide ${mutedText}`}
+            >
+              Messages
+            </div>
+            <div className={`mt-1 text-2xl font-bold ${strongText}`}>
+              {messages.length}
+            </div>
+          </div>
+
+          <div className={`${cardClass} p-4`}>
+            <div
+              className={`text-[10px] font-bold uppercase tracking-wide ${mutedText}`}
+            >
+              Unread
+            </div>
+            <div className={`mt-1 text-2xl font-bold ${strongText}`}>
+              {unread}
+            </div>
+          </div>
+        </div>
+
+        <div className={`${cardClass} overflow-hidden`}>
+          {infoRows.map(([label, value], index) => (
+            <div
+              key={label}
+              className={`flex items-center justify-between gap-4 px-4 py-3 text-xs ${
+                index !== infoRows.length - 1
+                  ? theme === "dark"
+                    ? "border-b border-white/10"
+                    : "border-b border-gray-100"
+                  : ""
+              }`}
+            >
+              <div className={mutedText}>{label}</div>
+              <div
+                className={`min-w-0 truncate text-right font-bold ${strongText}`}
+              >
+                {value || "-"}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={openNicknameModal}
+          className={`${primaryButtonClass} w-full`}
+        >
+          Edit Nickname
+        </button>
+      </div>
+    );
+  }
 
   return (
     <Shell title="Live Chat">
@@ -2955,202 +2950,206 @@ export default function AdminChat() {
             {error}
           </div>
         ) : null}
-      
+
         <div className="grid h-[calc(100dvh-150px)] min-h-[620px] grid-cols-1 gap-4 overflow-hidden xl:h-[calc(95vh-112px)] xl:min-h-0 xl:grid-cols-[500px_minmax(0,1fr)]">
           <aside
             className={`${panelClass} ${
               isMobileChatOpen ? "hidden xl:flex" : "flex"
             } relative h-full min-h-0 flex-col overflow-hidden p-3 pl-[84px] sm:p-4 sm:pl-[92px]`}
           >
-              <div
-                className={`absolute left-0 top-0 flex h-full w-[72px] shrink-0 flex-col items-center gap-2 border-r p-2 ${
-                  theme === "dark"
-                    ? "border-white/10 bg-[#0b1220]/65"
-                    : "border-gray-200 bg-gray-100"
-                }`}
-              >
-                <button
-                  type="button"
-                  onClick={() => setActiveChatTabId("all")}
-                  className={classNames(
-                    "flex w-full flex-col items-center justify-center rounded-2xl px-2 py-3 text-[10px] font-bold transition",
-                    activeChatTabId === "all"
-                      ? theme === "dark"
-                        ? "bg-white text-gray-950"
-                        : "bg-gray-900 text-white"
-                      : theme === "dark"
+            <div
+              className={`absolute left-0 top-0 flex h-full w-[72px] shrink-0 flex-col items-center gap-2 border-r p-2 ${
+                theme === "dark"
+                  ? "border-white/10 bg-[#0b1220]/65"
+                  : "border-gray-200 bg-gray-100"
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => setActiveChatTabId("all")}
+                className={classNames(
+                  "flex w-full flex-col items-center justify-center rounded-2xl px-2 py-3 text-[10px] font-bold transition",
+                  activeChatTabId === "all"
+                    ? theme === "dark"
+                      ? "bg-white text-gray-950"
+                      : "bg-gray-900 text-white"
+                    : theme === "dark"
                       ? "text-white/60 hover:bg-white/10 hover:text-white"
-                      : "text-gray-500 hover:bg-white hover:text-gray-900"
-                  )}
-                  title="All chats"
-                >
-                  <MessageCircle className="mb-1 h-5 w-5" />
-                  <span>All</span>
-                </button>
+                      : "text-gray-500 hover:bg-white hover:text-gray-900",
+                )}
+                title="All chats"
+              >
+                <MessageCircle className="mb-1 h-5 w-5" />
+                <span>All</span>
+              </button>
 
-                <div className="w-full min-h-0 flex-1 space-y-2 overflow-y-auto">
-                  {chatTabs.map((tab) => {
-                    const active = activeChatTabId === String(tab.id);
-                    const shortName = String(tab.name || "?").slice(0, 2).toUpperCase();
+              <div className="w-full min-h-0 flex-1 space-y-2 overflow-y-auto">
+                {chatTabs.map((tab) => {
+                  const active = activeChatTabId === String(tab.id);
+                  const shortName = String(tab.name || "?")
+                    .slice(0, 2)
+                    .toUpperCase();
 
-                    return (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        onClick={() => setActiveChatTabId(String(tab.id))}
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveChatTabId(String(tab.id))}
+                      className={classNames(
+                        "flex w-full flex-col items-center justify-center rounded-2xl px-2 py-3 text-[10px] font-bold transition",
+                        active
+                          ? theme === "dark"
+                            ? "bg-white text-gray-950"
+                            : "bg-gray-900 text-white"
+                          : theme === "dark"
+                            ? "text-white/60 hover:bg-white/10 hover:text-white"
+                            : "text-gray-500 hover:bg-white hover:text-gray-900",
+                      )}
+                      title={tab.name}
+                    >
+                      <div
                         className={classNames(
-                          "flex w-full flex-col items-center justify-center rounded-2xl px-2 py-3 text-[10px] font-bold transition",
+                          "mb-1 flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold",
                           active
                             ? theme === "dark"
-                              ? "bg-white text-gray-950"
-                              : "bg-gray-900 text-white"
+                              ? "bg-gray-950 text-white"
+                              : "bg-white text-gray-900"
                             : theme === "dark"
-                            ? "text-white/60 hover:bg-white/10 hover:text-white"
-                            : "text-gray-500 hover:bg-white hover:text-gray-900"
-                        )}
-                        title={tab.name}
-                      >
-                        <div
-                          className={classNames(
-                            "mb-1 flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold",
-                            active
-                              ? theme === "dark"
-                                ? "bg-gray-950 text-white"
-                                : "bg-white text-gray-900"
-                              : theme === "dark"
                               ? "bg-white/10 text-white/75"
-                              : "bg-white text-gray-600"
-                          )}
-                        >
-                          {shortName}
-                        </div>
-          
-                        <span className="line-clamp-2 max-w-full leading-tight">
-                          {tab.name}
-                        </span>
-                      </button>
-                    );
-                  })}
+                              : "bg-white text-gray-600",
+                        )}
+                      >
+                        {shortName}
+                      </div>
+
+                      <span className="line-clamp-2 max-w-full leading-tight">
+                        {tab.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={openCreateTabModal}
+                disabled={creatingTab}
+                className={`flex w-full flex-col items-center justify-center rounded-2xl px-2 py-3 text-[10px] font-bold transition disabled:opacity-50 ${
+                  theme === "dark"
+                    ? "text-white/65 hover:bg-white/10 hover:text-white"
+                    : "text-gray-500 hover:bg-white hover:text-gray-900"
+                }`}
+                title="Create tab"
+              >
+                <Plus className="mb-1 h-5 w-5" />
+                <span>{creatingTab ? "Adding" : "Add"}</span>
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div className={`text-sm font-bold ${strongText}`}>
+                  Conversations
                 </div>
+
+                {searchingMessages ? (
+                  <div className={`mt-0.5 text-[10px] ${mutedText}`}>
+                    Searching message history...
+                  </div>
+                ) : (
+                  <div className={`mt-0.5 text-[10px] ${mutedText}`}>
+                    Live support inbox
+                  </div>
+                )}
+              </div>
+
+              <div className="ml-auto flex shrink-0 items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setHotkeysModalOpen(true)}
+                  className={buttonClass}
+                  title="Hotkeys"
+                >
+                  Hotkeys
+                </button>
 
                 <button
                   type="button"
-                  onClick={openCreateTabModal}
-                  disabled={creatingTab}
-                  className={`flex w-full flex-col items-center justify-center rounded-2xl px-2 py-3 text-[10px] font-bold transition disabled:opacity-50 ${
-                    theme === "dark"
-                      ? "text-white/65 hover:bg-white/10 hover:text-white"
-                      : "text-gray-500 hover:bg-white hover:text-gray-900"
-                  }`}
-                  title="Create tab"
+                  onClick={() => {
+                    loadConvos({ silent: true });
+                    loadUsersCache();
+                  }}
+                  disabled={refreshingConvos || loadingUsers}
+                  className={`${buttonClass} inline-flex items-center gap-2 disabled:opacity-50`}
                 >
-                  <Plus className="mb-1 h-5 w-5" />
-                  <span>{creatingTab ? "Adding" : "Add"}</span>
+                  <span>
+                    {refreshingConvos || loadingUsers ? "Syncing" : "Refresh"}
+                  </span>
+
+                  {refreshingConvos || loadingUsers ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : null}
                 </button>
               </div>
-          
-                <div className="flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className={`text-sm font-bold ${strongText}`}>
-                      Conversations
-                    </div>
-                
-                    {searchingMessages ? (
-                      <div className={`mt-0.5 text-[10px] ${mutedText}`}>
-                        Searching message history...
-                      </div>
-                    ) : (
-                      <div className={`mt-0.5 text-[10px] ${mutedText}`}>
-                        Live support inbox
-                      </div>
-                    )}
+            </div>
+
+            <div className="relative mt-4">
+              <Search
+                className={`pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 ${
+                  theme === "dark" ? "text-white/30" : "text-gray-400"
+                }`}
+              />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search phone / UID / message..."
+                className={`w-full rounded-2xl border ${
+                  theme === "dark"
+                    ? "border-white/10 bg-white/5 text-white/90 placeholder:text-white/30 focus:border-white/20"
+                    : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-gray-400"
+                } py-2.5 pl-10 pr-3 text-xs outline-none`}
+              />
+            </div>
+
+            <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
+              {loadingConvos && filteredSortedConvos.length === 0 ? (
+                <div className={`${cardClass} p-4 text-xs ${mutedText}`}>
+                  Loading conversations...
+                </div>
+              ) : filteredSortedConvos.length === 0 ? (
+                <div className={`${cardClass} p-4`}>
+                  <div className={`text-xs font-semibold ${strongText}`}>
+                    {q.trim()
+                      ? "No matching conversations."
+                      : "No messages yet."}
                   </div>
-                
-                  <div className="ml-auto flex shrink-0 items-center justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setHotkeysModalOpen(true)}
-                      className={buttonClass}
-                      title="Hotkeys"
-                    >
-                      Hotkeys
-                    </button>
-                
-                    <button
-                      type="button"
-                      onClick={() => {
-                        loadConvos({ silent: true });
-                        loadUsersCache();
-                      }}
-                      disabled={refreshingConvos || loadingUsers}
-                      className={`${buttonClass} inline-flex items-center gap-2 disabled:opacity-50`}
-                    >
-                      <span>
-                        {refreshingConvos || loadingUsers ? "Syncing" : "Refresh"}
-                      </span>
-                
-                      {refreshingConvos || loadingUsers ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : null}
-                    </button>
+                  <div className={`mt-1 text-[11px] ${mutedText}`}>
+                    {q.trim()
+                      ? "Try searching UID, phone, last message, or message history."
+                      : "Once a user sends a message, it will appear here."}
                   </div>
                 </div>
+              ) : (
+                <div className="space-y-5">
+                  {groupedConvos.map((group) => (
+                    <div key={group.key}>
+                      <div
+                        className={`mb-2 flex items-center justify-between px-1 text-[10px] font-bold uppercase tracking-[0.16em] ${
+                          theme === "dark" ? "text-white/35" : "text-gray-400"
+                        }`}
+                      >
+                        <span>{group.title}</span>
+                        <span>{group.count}</span>
+                      </div>
 
-               <div className="relative mt-4">
-                 <Search
-                   className={`pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 ${
-                     theme === "dark" ? "text-white/30" : "text-gray-400"
-                   }`}
-                 />
-                 <input
-                   value={q}
-                   onChange={(e) => setQ(e.target.value)}
-                   placeholder="Search phone / UID / message..."
-                   className={`w-full rounded-2xl border ${
-                     theme === "dark"
-                       ? "border-white/10 bg-white/5 text-white/90 placeholder:text-white/30 focus:border-white/20"
-                       : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:border-gray-400"
-                   } py-2.5 pl-10 pr-3 text-xs outline-none`}
-                 />
-               </div>
-   
-               <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
-                 {loadingConvos && filteredSortedConvos.length === 0 ? (
-                   <div className={`${cardClass} p-4 text-xs ${mutedText}`}>
-                     Loading conversations...
-                   </div>
-                 ) : filteredSortedConvos.length === 0 ? (
-                   <div className={`${cardClass} p-4`}>
-                     <div className={`text-xs font-semibold ${strongText}`}>
-                       {q.trim() ? "No matching conversations." : "No messages yet."}
-                     </div>
-                     <div className={`mt-1 text-[11px] ${mutedText}`}>
-                       {q.trim()
-                         ? "Try searching UID, phone, last message, or message history."
-                         : "Once a user sends a message, it will appear here."}
-                     </div>
-                   </div>
-                 ) : (
-                   <div className="space-y-5">
-                     {groupedConvos.map((group) => (
-                       <div key={group.key}>
-                         <div
-                           className={`mb-2 flex items-center justify-between px-1 text-[10px] font-bold uppercase tracking-[0.16em] ${
-                             theme === "dark" ? "text-white/35" : "text-gray-400"
-                           }`}
-                         >
-                           <span>{group.title}</span>
-                           <span>{group.count}</span>
-                         </div>
-
-                         <div className="space-y-1.5">
-                           {group.items.map((c) => renderConversationRow(c))}
-                         </div>
-                       </div>
-                     ))}
-                   </div>
-                 )}
-               </div>
+                      <div className="space-y-1.5">
+                        {group.items.map((c) => renderConversationRow(c))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </aside>
 
           <main
@@ -3180,7 +3179,7 @@ export default function AdminChat() {
                       ←
                     </button>
                   ) : null}
-              
+
                   <div
                     className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl sm:h-11 sm:w-11 ${
                       theme === "dark"
@@ -3193,7 +3192,9 @@ export default function AdminChat() {
 
                   <div className="min-w-0">
                     <div className="flex min-w-0 items-center gap-2">
-                      <div className={`truncate text-sm font-bold ${strongText}`}>
+                      <div
+                        className={`truncate text-sm font-bold ${strongText}`}
+                      >
                         {activeUserId ? activeTitle : "Select a user"}
                       </div>
 
@@ -3209,7 +3210,9 @@ export default function AdminChat() {
                       ) : null}
                     </div>
 
-                    <div className={`mt-1 flex flex-wrap items-center gap-2 text-[11px] ${mutedText}`}>
+                    <div
+                      className={`mt-1 flex flex-wrap items-center gap-2 text-[11px] ${mutedText}`}
+                    >
                       {activeUserId ? (
                         <>
                           <span>UID: {activeIdentity.uid}</span>
@@ -3233,8 +3236,8 @@ export default function AdminChat() {
                             ? "bg-emerald-400/10 text-emerald-200"
                             : "bg-white/5 text-white/55"
                           : activeConvo?.isOnline
-                          ? "bg-emerald-50 text-emerald-700"
-                          : "bg-gray-100 text-gray-600"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-gray-100 text-gray-600",
                       )}
                     >
                       {activePresenceText}
@@ -3305,7 +3308,9 @@ export default function AdminChat() {
                   </div>
                 </div>
               ) : loadingMsgs && (!messages || messages.length === 0) ? (
-                <div className={`text-xs ${mutedText}`}>Loading messages...</div>
+                <div className={`text-xs ${mutedText}`}>
+                  Loading messages...
+                </div>
               ) : messages.length === 0 ? (
                 <div className="flex h-full items-center justify-center">
                   <div className={`${cardClass} max-w-sm p-6 text-center`}>
@@ -3336,7 +3341,9 @@ export default function AdminChat() {
                             <div className="flex items-center gap-3">
                               <div
                                 className={`h-px flex-1 ${
-                                  theme === "dark" ? "bg-white/10" : "bg-gray-200"
+                                  theme === "dark"
+                                    ? "bg-white/10"
+                                    : "bg-gray-200"
                                 }`}
                               />
                               <div
@@ -3350,14 +3357,16 @@ export default function AdminChat() {
                               </div>
                               <div
                                 className={`h-px flex-1 ${
-                                  theme === "dark" ? "bg-white/10" : "bg-gray-200"
+                                  theme === "dark"
+                                    ? "bg-white/10"
+                                    : "bg-gray-200"
                                 }`}
                               />
                             </div>
                           </div>
                         );
                       }
-                
+
                       const m = item.data;
                       const isAdmin = m.sender === "admin";
                       const imgSrc = m.imageUrl
@@ -3365,19 +3374,19 @@ export default function AdminChat() {
                           ? m.imageUrl
                           : `${API_BASE}${m.imageUrl}`
                         : "";
-                
+
                       let ticks = "";
                       if (isAdmin) {
                         if (m.userRead || m.status === "read") ticks = "✓✓";
                         else ticks = "✓";
                       }
-                
+
                       return (
                         <div
                           key={item.id}
                           className={classNames(
                             "group/message flex items-start gap-2",
-                            isAdmin ? "justify-end" : "justify-start"
+                            isAdmin ? "justify-end" : "justify-start",
                           )}
                         >
                           {isAdmin && m.type === "image" && imgSrc ? (
@@ -3391,14 +3400,14 @@ export default function AdminChat() {
                                 "mt-2 inline-flex shrink-0 items-center justify-center opacity-0 transition duration-200 group-hover/message:opacity-100",
                                 theme === "dark"
                                   ? "text-white/45 hover:text-red-400"
-                                  : "text-gray-400 hover:text-red-500"
+                                  : "text-gray-400 hover:text-red-500",
                               )}
                               title="Delete image"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
                           ) : null}
-                
+
                           <div
                             onContextMenu={(e) => {
                               if (isAdmin && m.type === "text") {
@@ -3406,7 +3415,11 @@ export default function AdminChat() {
                                 startEditMessage(m);
                               }
                             }}
-                            title={isAdmin && m.type === "text" ? "Right-click to edit message" : ""}
+                            title={
+                              isAdmin && m.type === "text"
+                                ? "Right-click to edit message"
+                                : ""
+                            }
                             className={classNames(
                               "max-w-[86%] rounded-[22px] px-3.5 py-3 text-xs leading-relaxed shadow-sm sm:max-w-[68%] sm:rounded-[24px]",
                               isAdmin
@@ -3414,8 +3427,8 @@ export default function AdminChat() {
                                   ? "border border-white/10 bg-white/[0.11] text-white"
                                   : "border border-gray-300 bg-gray-100 text-gray-900"
                                 : theme === "dark"
-                                ? "border border-white/10 bg-[#101827] text-white"
-                                : "border border-gray-200 bg-white text-gray-900"
+                                  ? "border border-white/10 bg-[#101827] text-white"
+                                  : "border border-gray-200 bg-white text-gray-900",
                             )}
                           >
                             {m.type === "image" && imgSrc ? (
@@ -3426,7 +3439,7 @@ export default function AdminChat() {
                                   className="block w-full max-w-[280px] cursor-zoom-in rounded-2xl transition duration-200 group-hover/message:brightness-90"
                                   onClick={() => openPreview(imgSrc)}
                                 />
-                
+
                                 {m.message ? (
                                   <div className="mt-2 whitespace-pre-wrap">
                                     {m.message}
@@ -3434,21 +3447,25 @@ export default function AdminChat() {
                                 ) : null}
                               </div>
                             ) : (
-                              <div className="whitespace-pre-wrap">{m.message}</div>
+                              <div className="whitespace-pre-wrap">
+                                {m.message}
+                              </div>
                             )}
-                
+
                             <div
                               className={`mt-2 flex items-center gap-1.5 text-[10px] ${
                                 isAdmin ? "justify-end" : "justify-start"
                               } ${theme === "dark" ? "text-white/55" : "text-gray-500"}`}
                             >
                               <span>{formatMessageTime(m.createdAt)}</span>
-                
+
                               {isAdmin ? (
                                 <span
                                   className={classNames(
                                     "font-mono leading-none",
-                                    theme === "dark" ? "text-white/70" : "text-gray-600"
+                                    theme === "dark"
+                                      ? "text-white/70"
+                                      : "text-gray-600",
                                   )}
                                   title={
                                     m.userRead || m.status === "read"
@@ -3459,13 +3476,15 @@ export default function AdminChat() {
                                   {ticks}
                                 </span>
                               ) : null}
-                
+
                               {isAdmin && m.edited ? (
                                 <button
                                   type="button"
                                   onClick={() => openEditHistory(m)}
                                   className={`font-semibold underline-offset-2 hover:underline ${
-                                    theme === "dark" ? "text-white/75" : "text-gray-700"
+                                    theme === "dark"
+                                      ? "text-white/75"
+                                      : "text-gray-700"
                                   }`}
                                   title="View edit history"
                                 >
@@ -3478,7 +3497,7 @@ export default function AdminChat() {
                       );
                     })}
                   </div>
-                
+
                   {showJumpToLatest ? (
                     <button
                       type="button"
@@ -3506,7 +3525,6 @@ export default function AdminChat() {
                     : "border border-gray-200 bg-white"
                 }`}
               >
-
                 {editingMessage ? (
                   <div
                     className={`mb-2 flex items-center justify-between gap-3 rounded-2xl px-3 py-2 text-xs ${
@@ -3517,11 +3535,13 @@ export default function AdminChat() {
                   >
                     <div className="min-w-0">
                       <div className="font-semibold">Editing message</div>
-                      <div className={`mt-0.5 truncate text-[11px] ${mutedText}`}>
+                      <div
+                        className={`mt-0.5 truncate text-[11px] ${mutedText}`}
+                      >
                         Right-click selected message loaded into input
                       </div>
                     </div>
-                
+
                     <button
                       type="button"
                       onClick={cancelEditingMessage}
@@ -3564,19 +3584,19 @@ export default function AdminChat() {
                     onChange={(e) => {
                       const value = e.target.value;
                       setText(value);
-                    
+
                       if (activeUserId) {
                         setDraftsCache((prev) => {
                           const next = {
                             ...prev,
                             [String(activeUserId)]: value,
                           };
-                    
+
                           saveAdminChatDraftsCache(next);
                           return next;
                         });
                       }
-                    
+
                       if (!activeUserId) return;
 
                       socketRef.current?.emit("admin:typing", {
@@ -3598,9 +3618,7 @@ export default function AdminChat() {
                     onPaste={handleComposerPaste}
                     onInput={resizeComposer}
                     placeholder={
-                      !activeUserId
-                        ? "Select a user to reply..."
-                        : ""
+                      !activeUserId ? "Select a user to reply..." : ""
                     }
                     disabled={!activeUserId}
                     rows={1}
@@ -3609,7 +3627,7 @@ export default function AdminChat() {
                         if (e.key === "ArrowDown") {
                           e.preventDefault();
                           setSlashIndex((prev) =>
-                            prev + 1 >= slashMatches.length ? 0 : prev + 1
+                            prev + 1 >= slashMatches.length ? 0 : prev + 1,
                           );
                           return;
                         }
@@ -3617,7 +3635,7 @@ export default function AdminChat() {
                         if (e.key === "ArrowUp") {
                           e.preventDefault();
                           setSlashIndex((prev) =>
-                            prev - 1 < 0 ? slashMatches.length - 1 : prev - 1
+                            prev - 1 < 0 ? slashMatches.length - 1 : prev - 1,
                           );
                           return;
                         }
@@ -3668,7 +3686,7 @@ export default function AdminChat() {
                     >
                       😀
                     </button>
-                  
+
                     {emojiPickerOpen ? (
                       <div
                         className={`absolute bottom-[calc(100%+8px)] right-0 z-30 overflow-hidden rounded-2xl border shadow-2xl ${
@@ -3690,7 +3708,7 @@ export default function AdminChat() {
                       </div>
                     ) : null}
                   </div>
-                  
+
                   <button
                     onClick={sendReply}
                     disabled={!activeUserId || !text.trim() || savingEdit}
@@ -3723,8 +3741,8 @@ export default function AdminChat() {
                                   ? "bg-white/10 text-white"
                                   : "bg-gray-100 text-gray-900"
                                 : theme === "dark"
-                                ? "text-white/75 hover:bg-white/5 hover:text-white"
-                                : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                                  ? "text-white/75 hover:bg-white/5 hover:text-white"
+                                  : "text-gray-700 hover:bg-gray-50 hover:text-gray-900",
                             )}
                           >
                             <div
@@ -3738,7 +3756,9 @@ export default function AdminChat() {
                               <div className="text-xs font-semibold">
                                 /{item.key} • {item.label}
                               </div>
-                              <div className={`mt-1 line-clamp-2 text-[11px] ${mutedText}`}>
+                              <div
+                                className={`mt-1 line-clamp-2 text-[11px] ${mutedText}`}
+                              >
                                 {item.text}
                               </div>
                             </div>
@@ -3795,12 +3815,16 @@ export default function AdminChat() {
                 : "border border-gray-200 bg-gray-50"
             }`}
           >
-            <div className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${mutedText}`}>
+            <div
+              className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${mutedText}`}
+            >
               Current user
             </div>
 
             <div className={`mt-2 text-sm font-semibold ${strongText}`}>
-              {activeIdentity.uid !== "-" ? activeIdentity.uid : activeUserId || "-"}
+              {activeIdentity.uid !== "-"
+                ? activeIdentity.uid
+                : activeUserId || "-"}
             </div>
 
             {activeIdentity.phone !== "-" ? (
@@ -3830,7 +3854,9 @@ export default function AdminChat() {
               autoFocus
             />
 
-            <div className={`mt-2 flex justify-between text-[11px] ${mutedText}`}>
+            <div
+              className={`mt-2 flex justify-between text-[11px] ${mutedText}`}
+            >
               <span>Use this to label users internally.</span>
               <span>{nicknameDraft.length}/40</span>
             </div>
@@ -3858,7 +3884,7 @@ export default function AdminChat() {
             >
               Cancel
             </button>
-      
+
             <button
               type="button"
               onClick={() => createChatTab()}
@@ -3875,7 +3901,7 @@ export default function AdminChat() {
             <label className={`mb-2 block text-xs font-bold ${strongText}`}>
               Tab name
             </label>
-      
+
             <input
               value={newTabName}
               onChange={(e) => setNewTabName(e.target.value)}
@@ -3890,9 +3916,10 @@ export default function AdminChat() {
               autoFocus
               className={inputClass}
             />
-      
+
             <div className={`mt-2 text-[11px] ${mutedText}`}>
-              One chat can only belong to one custom tab. All chats still appear in All.
+              One chat can only belong to one custom tab. All chats still appear
+              in All.
             </div>
           </div>
         </div>
@@ -3904,7 +3931,12 @@ export default function AdminChat() {
         subtitle="This image has not been sent yet. Confirm before it reaches the user."
         onClose={closePendingImagePreview}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey && !uploadingImage && pendingImageFile) {
+          if (
+            e.key === "Enter" &&
+            !e.shiftKey &&
+            !uploadingImage &&
+            pendingImageFile
+          ) {
             e.preventDefault();
             confirmSendPendingImage();
           }
@@ -3919,7 +3951,7 @@ export default function AdminChat() {
             >
               Cancel
             </button>
-      
+
             <button
               type="button"
               onClick={confirmSendPendingImage}
@@ -3947,7 +3979,7 @@ export default function AdminChat() {
               "overflow-hidden rounded-2xl",
               theme === "dark"
                 ? "border border-white/10 bg-black/20"
-                : "border border-gray-200 bg-gray-50"
+                : "border border-gray-200 bg-gray-50",
             )}
           >
             {pendingImageSrc ? (
@@ -3958,18 +3990,19 @@ export default function AdminChat() {
               />
             ) : null}
           </div>
-      
+
           <div
             className={classNames(
               "rounded-2xl p-3 text-xs",
               theme === "dark"
                 ? "border border-white/10 bg-white/5 text-white/65"
-                : "border border-gray-200 bg-gray-50 text-gray-600"
+                : "border border-gray-200 bg-gray-50 text-gray-600",
             )}
           >
             <div className="font-semibold">Safety check</div>
             <div className="mt-1">
-              Confirm the image is correct before sending. Pasted images are no longer sent automatically.
+              Confirm the image is correct before sending. Pasted images are no
+              longer sent automatically.
             </div>
           </div>
         </div>
@@ -3990,7 +4023,7 @@ export default function AdminChat() {
             >
               Cancel
             </button>
-      
+
             <button
               type="button"
               onClick={confirmDeleteImage}
@@ -4018,28 +4051,31 @@ export default function AdminChat() {
               "flex gap-3 rounded-2xl p-4",
               theme === "dark"
                 ? "border border-red-400/15 bg-red-500/10 text-red-100"
-                : "border border-red-100 bg-red-50 text-red-700"
+                : "border border-red-100 bg-red-50 text-red-700",
             )}
           >
             <div className="mt-0.5">
               <AlertTriangle className="h-5 w-5" />
             </div>
-      
+
             <div>
-              <div className="text-sm font-bold">This action cannot be undone.</div>
+              <div className="text-sm font-bold">
+                This action cannot be undone.
+              </div>
               <div className="mt-1 text-xs opacity-80">
-                The image will be removed from this conversation for the admin and the user.
+                The image will be removed from this conversation for the admin
+                and the user.
               </div>
             </div>
           </div>
-      
+
           {imageToDelete?.imageUrl ? (
             <div
               className={classNames(
                 "overflow-hidden rounded-2xl",
                 theme === "dark"
                   ? "border border-white/10 bg-black/20"
-                  : "border border-gray-200 bg-gray-50"
+                  : "border border-gray-200 bg-gray-50",
               )}
             >
               <img
@@ -4093,19 +4129,26 @@ export default function AdminChat() {
                 : "border border-gray-200 bg-gray-50"
             }`}
           >
-            <div className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${mutedText}`}>
+            <div
+              className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${mutedText}`}
+            >
               Current message
             </div>
-      
-            <div className={`mt-2 whitespace-pre-wrap text-sm font-semibold ${strongText}`}>
+
+            <div
+              className={`mt-2 whitespace-pre-wrap text-sm font-semibold ${strongText}`}
+            >
               {historyMessage?.message || "-"}
             </div>
-      
+
             <div className={`mt-2 text-[11px] ${mutedText}`}>
-              Last edited: {historyMessage?.editedAt ? formatTime(historyMessage.editedAt) : "-"}
+              Last edited:{" "}
+              {historyMessage?.editedAt
+                ? formatTime(historyMessage.editedAt)
+                : "-"}
             </div>
           </div>
-      
+
           {Array.isArray(historyMessage?.editHistory) &&
           historyMessage.editHistory.length > 0 ? (
             <div className="space-y-3">
@@ -4122,35 +4165,43 @@ export default function AdminChat() {
                     <div className={`text-xs font-bold ${strongText}`}>
                       Edit #{historyMessage.editHistory.length - index}
                     </div>
-      
+
                     <div className={`text-[11px] ${mutedText}`}>
                       {item.editedAt ? formatTime(item.editedAt) : "-"}
                     </div>
                   </div>
-      
+
                   <div className="mt-4 grid gap-3">
                     <div
                       className={`rounded-xl p-3 ${
                         theme === "dark" ? "bg-red-500/10" : "bg-red-50"
                       }`}
                     >
-                      <div className={`text-[10px] font-bold uppercase tracking-[0.16em] ${mutedText}`}>
+                      <div
+                        className={`text-[10px] font-bold uppercase tracking-[0.16em] ${mutedText}`}
+                      >
                         Before
                       </div>
-                      <div className={`mt-1 whitespace-pre-wrap text-xs ${softText}`}>
+                      <div
+                        className={`mt-1 whitespace-pre-wrap text-xs ${softText}`}
+                      >
                         {item.oldMessage || "-"}
                       </div>
                     </div>
-      
+
                     <div
                       className={`rounded-xl p-3 ${
                         theme === "dark" ? "bg-emerald-500/10" : "bg-emerald-50"
                       }`}
                     >
-                      <div className={`text-[10px] font-bold uppercase tracking-[0.16em] ${mutedText}`}>
+                      <div
+                        className={`text-[10px] font-bold uppercase tracking-[0.16em] ${mutedText}`}
+                      >
                         After
                       </div>
-                      <div className={`mt-1 whitespace-pre-wrap text-xs ${softText}`}>
+                      <div
+                        className={`mt-1 whitespace-pre-wrap text-xs ${softText}`}
+                      >
                         {item.newMessage || "-"}
                       </div>
                     </div>
@@ -4189,7 +4240,7 @@ export default function AdminChat() {
       >
         {renderHotkeySettingsPanel()}
       </Modal>
-      
+
       <Modal
         open={chatInfoModalOpen}
         onClose={() => setChatInfoModalOpen(false)}
@@ -4201,7 +4252,6 @@ export default function AdminChat() {
       >
         {renderChatInfoPanel()}
       </Modal>
-
     </Shell>
   );
 }
