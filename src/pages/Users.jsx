@@ -10,8 +10,7 @@ const API_BASE =
   "https://shaky-emmye-jayjay122-068ebc66.koyeb.app";
 
 const USER_SITE_BASE =
-  import.meta.env.VITE_USER_SITE_URL ||
-  "https://fsphile.com";
+  import.meta.env.VITE_USER_SITE_URL || "https://fsphile.com";
 
 const USERS_CACHE_KEY = "admin_users_page_cache_v1";
 
@@ -82,11 +81,17 @@ function sortUsersList(list, sortBy) {
     }
 
     if (sortBy === "balance_desc") {
-      return safeNum(b.displayBalance ?? b.balance) - safeNum(a.displayBalance ?? a.balance);
+      return (
+        safeNum(b.displayBalance ?? b.balance) -
+        safeNum(a.displayBalance ?? a.balance)
+      );
     }
 
     if (sortBy === "balance_asc") {
-      return safeNum(a.displayBalance ?? a.balance) - safeNum(b.displayBalance ?? b.balance);
+      return (
+        safeNum(a.displayBalance ?? a.balance) -
+        safeNum(b.displayBalance ?? b.balance)
+      );
     }
 
     if (sortBy === "orders_desc") {
@@ -150,10 +155,14 @@ function Modal({ open, title, subtitle, children, onClose, footer }) {
       : "relative w-full max-w-lg overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl";
 
   const titleClass =
-    theme === "dark" ? "text-base font-semibold text-white" : "text-base font-semibold text-gray-900";
+    theme === "dark"
+      ? "text-base font-semibold text-white"
+      : "text-base font-semibold text-gray-900";
 
   const subtitleClass =
-    theme === "dark" ? "mt-1 text-xs text-white/50" : "mt-1 text-xs text-gray-500";
+    theme === "dark"
+      ? "mt-1 text-xs text-white/50"
+      : "mt-1 text-xs text-gray-500";
 
   const closeBtnClass =
     theme === "dark"
@@ -174,9 +183,7 @@ function Modal({ open, title, subtitle, children, onClose, footer }) {
     >
       <div
         className={`absolute inset-0 ${
-          theme === "dark"
-            ? "bg-black/75"
-            : "bg-slate-950/45"
+          theme === "dark" ? "bg-black/75" : "bg-slate-950/45"
         } backdrop-blur-xl`}
       />
 
@@ -193,7 +200,9 @@ function Modal({ open, title, subtitle, children, onClose, footer }) {
             {subtitle ? <div className={subtitleClass}>{subtitle}</div> : null}
           </div>
 
-          <button onClick={onClose} className={closeBtnClass}>✕</button>
+          <button onClick={onClose} className={closeBtnClass}>
+            ✕
+          </button>
         </div>
 
         <div className="px-5 pb-5">{children}</div>
@@ -289,7 +298,9 @@ function Drawer({ open, title, subtitle, children, onClose }) {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">{children}</div>
+          <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
+            {children}
+          </div>
         </div>
       </div>
     </div>
@@ -384,8 +395,8 @@ function SelectMenu({
                         ? "bg-blue-500/15 text-blue-200"
                         : "bg-blue-50 text-blue-700"
                       : theme === "dark"
-                      ? "text-white/75 hover:bg-white/5 hover:text-white"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        ? "text-white/75 hover:bg-white/5 hover:text-white"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`}
                 >
                   <span>{opt.label}</span>
@@ -408,12 +419,12 @@ export default function Users() {
   const mutedText = theme === "dark" ? "text-white/50" : "text-gray-500";
   const softText = theme === "dark" ? "text-white/70" : "text-gray-600";
   const strongText = theme === "dark" ? "text-white" : "text-gray-900";
-  
+
   const cardClass =
     theme === "dark"
       ? "rounded-2xl border border-white/10 bg-white/5"
       : "rounded-2xl border border-gray-200 bg-white shadow-sm";
-  
+
   const inputClass =
     theme === "dark"
       ? "w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/90 placeholder:text-white/30 outline-none focus:border-white/20"
@@ -423,46 +434,42 @@ export default function Users() {
     theme === "dark"
       ? "rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/70 hover:bg-white/10"
       : "rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700 hover:bg-gray-50";
-  
+
   const tableWrapClass =
     theme === "dark"
       ? "mt-4 rounded-2xl border border-white/10"
       : "mt-4 rounded-2xl border border-gray-200 bg-white shadow-sm";
-  
+
   const tableHeaderBarClass =
     theme === "dark"
       ? "bg-white/5 px-4 py-3 text-sm font-semibold"
       : "bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-900";
-  
+
   const tableHeadClass =
     theme === "dark"
       ? "bg-white/5 text-xs text-white/60"
       : "bg-gray-50 text-xs text-gray-500";
-  
+
   const tableBodyClass =
-    theme === "dark"
-      ? "divide-y divide-white/10"
-      : "divide-y divide-gray-200";
-  
+    theme === "dark" ? "divide-y divide-white/10" : "divide-y divide-gray-200";
+
   const tableRowClass =
-    theme === "dark"
-      ? "hover:bg-white/5"
-      : "hover:bg-gray-50";
-  
+    theme === "dark" ? "hover:bg-white/5" : "hover:bg-gray-50";
+
   const footerBarClass =
     theme === "dark"
       ? "flex flex-col gap-3 border-t border-white/10 bg-white/5 px-4 py-3 md:flex-row md:items-center md:justify-between"
       : "flex flex-col gap-3 border-t border-gray-200 bg-gray-50 px-4 py-3 md:flex-row md:items-center md:justify-between";
-  
+
   const drawerSectionClass =
     theme === "dark"
-    ? "rounded-3xl border border-white/10 bg-white/[0.03] p-4"
-    : "rounded-3xl border border-gray-200 bg-gray-50 p-4";
+      ? "rounded-3xl border border-white/10 bg-white/[0.03] p-4"
+      : "rounded-3xl border border-gray-200 bg-gray-50 p-4";
 
   const drawerCardClass =
     theme === "dark"
-    ? "rounded-2xl border border-white/10 bg-white/[0.04] p-4"
-    : "rounded-2xl border border-gray-200 bg-white p-4";
+      ? "rounded-2xl border border-white/10 bg-white/[0.04] p-4"
+      : "rounded-2xl border border-gray-200 bg-white p-4";
 
   const drawerLabelClass =
     theme === "dark" ? "text-xs text-white/50" : "text-xs text-gray-500";
@@ -471,15 +478,17 @@ export default function Users() {
     theme === "dark"
       ? "mt-1 text-sm font-semibold text-white"
       : "mt-1 text-sm font-semibold text-gray-900";
-  
+
   const drawerMutedClass =
-    theme === "dark" ? "text-[11px] text-white/50" : "text-[11px] text-gray-500";
-  
+    theme === "dark"
+      ? "text-[11px] text-white/50"
+      : "text-[11px] text-gray-500";
+
   const drawerNeutralButtonClass =
     theme === "dark"
       ? "rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-left text-xs text-white/80 hover:bg-white/[0.07]"
       : "rounded-2xl border border-gray-200 bg-white px-4 py-3 text-left text-xs text-gray-800 hover:bg-gray-50";
-  
+
   const pillNeutralClass =
     theme === "dark"
       ? "rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 text-[10px] text-white/80"
@@ -494,12 +503,12 @@ export default function Users() {
     theme === "dark"
       ? "inline-flex rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 text-[10px] font-semibold text-white/80"
       : "inline-flex rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-[10px] font-semibold text-gray-700";
-  
+
   const skeletonCellClass =
     theme === "dark"
       ? "h-3 rounded-full bg-white/10"
       : "h-3 rounded-full bg-gray-200";
-  
+
   function LoadingSkeletonRows() {
     return Array.from({ length: 8 }).map((_, rowIndex) => (
       <tr key={`skeleton-${rowIndex}`} className={tableRowClass}>
@@ -512,35 +521,39 @@ export default function Users() {
                   colIndex === 0
                     ? "64px"
                     : colIndex === 1
-                    ? "110px"
-                    : colIndex === 2
-                    ? "90px"
-                    : colIndex === 8
-                    ? "180px"
-                    : "80px",
+                      ? "110px"
+                      : colIndex === 2
+                        ? "90px"
+                        : colIndex === 8
+                          ? "180px"
+                          : "80px",
               }}
             />
           </td>
         ))}
       </tr>
     ));
-  }    
-    const initialCache = loadUsersCache();
+  }
+  const initialCache = loadUsersCache();
 
-    const [rows, setRows] = useState(() => initialCache?.rows || []);
-    const [loading, setLoading] = useState(() => !initialCache?.rows?.length);
-    const [busyId, setBusyId] = useState(null);
-  
-    const [q, setQ] = useState(() => initialCache?.q || "");
-    const [roleFilter, setRoleFilter] = useState(() => initialCache?.roleFilter || "all");
-    const [sortBy, setSortBy] = useState(() => initialCache?.sortBy || "createdAt_desc");
+  const [rows, setRows] = useState(() => initialCache?.rows || []);
+  const [loading, setLoading] = useState(() => !initialCache?.rows?.length);
+  const [busyId, setBusyId] = useState(null);
 
-    const [orderEdit, setOrderEdit] = useState({});
-    const [resetEdit, setResetEdit] = useState({});
-    const [vipEdit, setVipEdit] = useState({});
-    const [creditScoreEdit, setCreditScoreEdit] = useState({});
-  
-    const [walletSummary, setWalletSummary] = useState({
+  const [q, setQ] = useState(() => initialCache?.q || "");
+  const [roleFilter, setRoleFilter] = useState(
+    () => initialCache?.roleFilter || "all",
+  );
+  const [sortBy, setSortBy] = useState(
+    () => initialCache?.sortBy || "createdAt_desc",
+  );
+
+  const [orderEdit, setOrderEdit] = useState({});
+  const [resetEdit, setResetEdit] = useState({});
+  const [vipEdit, setVipEdit] = useState({});
+  const [creditScoreEdit, setCreditScoreEdit] = useState({});
+
+  const [walletSummary, setWalletSummary] = useState({
     loading: false,
     userId: null,
     totalDeposit: 0,
@@ -552,7 +565,7 @@ export default function Users() {
   const [page, setPage] = useState(() => initialCache?.page || 1);
 
   // Balance modal
-    const [balanceModal, setBalanceModal] = useState({
+  const [balanceModal, setBalanceModal] = useState({
     open: false,
     userId: null,
     uid: "",
@@ -648,7 +661,7 @@ export default function Users() {
       hasAuth: !!auth,
     });
 
-   if (!auth) {
+    if (!auth) {
       console.error("[Users] Missing admin_token for:", url);
       throw new Error("Please login again.");
     }
@@ -676,240 +689,304 @@ export default function Users() {
       data,
     });
 
-  if (!res.ok) {
-    const msg = data?.message || `Request failed (${res.status})`;
+    if (!res.ok) {
+      const msg = data?.message || `Request failed (${res.status})`;
 
-    if (res.status === 401) {
-      console.error("[Users] 401 from:", url, data);
-    }
-
-    throw new Error(msg);
-  }
-
-  return data;
-}
-
-function resetBalanceModal() {
-  setBalanceModal({
-    open: false,
-    userId: null,
-    uid: "",
-    currentBalance: 0,
-    creditType: "balance",
-    mode: "inc",
-    amount: "",
-    note: "Admin bonus",
-  });
-}
-
-function applyWalletUserUpdate(userId, user) {
-  if (!userId && !user?._id) return;
-
-  const id = String(userId || user._id);
-
-  setRows((prev) =>
-    prev.map((u) =>
-      String(u._id) === id
-        ? {
-            ...u,
-            balance: Number(user?.balance ?? u.balance ?? 0),
-            displayBalance: Number(
-              user?.displayBalance ??
-                user?.shortBalance ??
-                user?.balance ??
-                u.displayBalance ??
-                u.balance ??
-                0
-            ),
-            availableBalance: Number(
-              user?.availableBalance ??
-                u.availableBalance ??
-                user?.balance ??
-                0
-            ),
-            shortBalance: Number(
-              user?.shortBalance ??
-                user?.displayBalance ??
-                u.shortBalance ??
-                u.displayBalance ??
-                0
-            ),
-            pendingAmount: Number(user?.pendingAmount ?? u.pendingAmount ?? 0),
-          }
-        : u
-    )
-  );
-
-  setActionsModal((prev) =>
-    prev.user && String(prev.user._id) === id
-      ? {
-          ...prev,
-          user: {
-            ...prev.user,
-            balance: Number(user?.balance ?? prev.user.balance ?? 0),
-            displayBalance: Number(
-              user?.displayBalance ??
-                user?.shortBalance ??
-                user?.balance ??
-                prev.user.displayBalance ??
-                prev.user.balance ??
-                0
-            ),
-            availableBalance: Number(
-              user?.availableBalance ??
-                prev.user.availableBalance ??
-                user?.balance ??
-                0
-            ),
-            shortBalance: Number(
-              user?.shortBalance ??
-                user?.displayBalance ??
-                prev.user.shortBalance ??
-                prev.user.displayBalance ??
-                0
-            ),
-            pendingAmount: Number(
-              user?.pendingAmount ?? prev.user.pendingAmount ?? 0
-            ),
-          },
-        }
-      : prev
-  );
-}
-
-async function accessUserAccount(user) {
-  if (!user?._id) {
-    toast.error("User not found");
-    return;
-  }
-
-  setBusyId(user._id);
-
-  try {
-    const data = await fetchJSON(
-      `${API_BASE}/api/admin/users/${user._id}/access-account`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      if (res.status === 401) {
+        console.error("[Users] 401 from:", url, data);
       }
-    );
 
-    if (!data?.token) {
-      throw new Error("No access token returned");
+      throw new Error(msg);
     }
 
-    const adminToken = localStorage.getItem("admin_token");
-
-    if (adminToken) {
-      localStorage.setItem("admin_token_backup", adminToken);
-    }
-
-    toast.success("Opening user account...");
-
-    const accessUrl =
-      `${USER_SITE_BASE}/admin-access.html#token=${encodeURIComponent(data.token)}`;
-    
-    window.open(accessUrl, "_blank", "noopener,noreferrer");
-  } catch (e) {
-    toast.error(e.message || "Failed to access user account");
-  } finally {
-    setBusyId(null);
-  }
-}
-
-function goToTrialBonus(user) {
-  const uid = String(user?.uid || "").trim();
-
-  if (!uid) {
-    toast.error("This user has no UID");
-    return;
+    return data;
   }
 
-  setActionsModal({ open: false, user: null });
-
-  navigate(`/admin/trial-bonus?uid=${encodeURIComponent(uid)}`);
-}
-
-async function copyUid(uid) {
-  const clean = String(uid || "").trim();
-
-  if (!clean) {
-    toast.error("No UID to copy");
-    return;
+  function resetBalanceModal() {
+    setBalanceModal({
+      open: false,
+      userId: null,
+      uid: "",
+      currentBalance: 0,
+      creditType: "balance",
+      mode: "inc",
+      amount: "",
+      note: "Admin bonus",
+    });
   }
 
-  try {
-    await navigator.clipboard.writeText(clean);
-    toast.success("UID copied");
-  } catch {
-    toast.error("Failed to copy UID");
-  }
-}
+  function applyWalletUserUpdate(userId, user) {
+    if (!userId && !user?._id) return;
 
-async function toggleSigninReward(user) {
-  if (!user?._id) return;
-
-  const nextEnabled = !Boolean(user.signinRewardEnabled);
-  setBusyId(user._id);
-
-  try {
-    const data = await fetchJSON(
-      `${API_BASE}/api/admin/users/${user._id}/signin-reward`,
-      {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          enabled: nextEnabled,
-        }),
-      }
-    );
+    const id = String(userId || user._id);
 
     setRows((prev) =>
       prev.map((u) =>
-        u._id === user._id
+        String(u._id) === id
           ? {
               ...u,
-              signinRewardEnabled: data.signinRewardEnabled,
+              balance: Number(user?.balance ?? u.balance ?? 0),
+              displayBalance: Number(
+                user?.displayBalance ??
+                  user?.shortBalance ??
+                  user?.balance ??
+                  u.displayBalance ??
+                  u.balance ??
+                  0,
+              ),
+              availableBalance: Number(
+                user?.availableBalance ??
+                  u.availableBalance ??
+                  user?.balance ??
+                  0,
+              ),
+              shortBalance: Number(
+                user?.shortBalance ??
+                  user?.displayBalance ??
+                  u.shortBalance ??
+                  u.displayBalance ??
+                  0,
+              ),
+              pendingAmount: Number(
+                user?.pendingAmount ?? u.pendingAmount ?? 0,
+              ),
             }
-          : u
-      )
+          : u,
+      ),
     );
 
     setActionsModal((prev) =>
-      prev.user && prev.user._id === user._id
+      prev.user && String(prev.user._id) === id
         ? {
             ...prev,
             user: {
               ...prev.user,
-              signinRewardEnabled: data.signinRewardEnabled,
+              balance: Number(user?.balance ?? prev.user.balance ?? 0),
+              displayBalance: Number(
+                user?.displayBalance ??
+                  user?.shortBalance ??
+                  user?.balance ??
+                  prev.user.displayBalance ??
+                  prev.user.balance ??
+                  0,
+              ),
+              availableBalance: Number(
+                user?.availableBalance ??
+                  prev.user.availableBalance ??
+                  user?.balance ??
+                  0,
+              ),
+              shortBalance: Number(
+                user?.shortBalance ??
+                  user?.displayBalance ??
+                  prev.user.shortBalance ??
+                  prev.user.displayBalance ??
+                  0,
+              ),
+              pendingAmount: Number(
+                user?.pendingAmount ?? prev.user.pendingAmount ?? 0,
+              ),
             },
           }
-        : prev
+        : prev,
     );
-
-    toast.success(
-      data.signinRewardEnabled
-        ? "Sign-in reward enabled"
-        : "Sign-in reward disabled"
-    );
-  } catch (e) {
-    toast.error(e.message || "Failed to update sign-in reward");
-  } finally {
-    setBusyId(null);
   }
-}
+
+  async function accessUserAccount(user) {
+    if (!user?._id) {
+      toast.error("User not found");
+      return;
+    }
+
+    setBusyId(user._id);
+
+    try {
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${user._id}/access-account`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+
+      if (!data?.token) {
+        throw new Error("No access token returned");
+      }
+
+      const adminToken = localStorage.getItem("admin_token");
+
+      if (adminToken) {
+        localStorage.setItem("admin_token_backup", adminToken);
+      }
+
+      toast.success("Opening user account...");
+
+      const accessUrl = `${USER_SITE_BASE}/admin-access.html#token=${encodeURIComponent(data.token)}`;
+
+      window.open(accessUrl, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      toast.error(e.message || "Failed to access user account");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function toggleUserVerification(user) {
+    if (!user?._id) {
+      toast.error("User not found");
+      return;
+    }
+
+    const nextVerified = !Boolean(user.isVerified);
+
+    setBusyId(user._id);
+
+    try {
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${user._id}/verify`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            isVerified: nextVerified,
+          }),
+        },
+      );
+
+      const updatedUser = data?.user || {};
+
+      setRows((prev) =>
+        prev.map((u) =>
+          u._id === user._id
+            ? {
+                ...u,
+                isVerified: Boolean(updatedUser.isVerified),
+                verifiedAt: updatedUser.verifiedAt || null,
+                verifiedBy: updatedUser.verifiedBy || null,
+              }
+            : u,
+        ),
+      );
+
+      setActionsModal((prev) =>
+        prev.user && prev.user._id === user._id
+          ? {
+              ...prev,
+              user: {
+                ...prev.user,
+                isVerified: Boolean(updatedUser.isVerified),
+                verifiedAt: updatedUser.verifiedAt || null,
+                verifiedBy: updatedUser.verifiedBy || null,
+              },
+            }
+          : prev,
+      );
+
+      toast.success(
+        updatedUser.isVerified
+          ? "User verified successfully"
+          : "User unverified successfully",
+      );
+    } catch (e) {
+      toast.error(e.message || "Failed to update verification");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  function goToTrialBonus(user) {
+    const uid = String(user?.uid || "").trim();
+
+    if (!uid) {
+      toast.error("This user has no UID");
+      return;
+    }
+
+    setActionsModal({ open: false, user: null });
+
+    navigate(`/admin/trial-bonus?uid=${encodeURIComponent(uid)}`);
+  }
+
+  async function copyUid(uid) {
+    const clean = String(uid || "").trim();
+
+    if (!clean) {
+      toast.error("No UID to copy");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(clean);
+      toast.success("UID copied");
+    } catch {
+      toast.error("Failed to copy UID");
+    }
+  }
+
+  async function toggleSigninReward(user) {
+    if (!user?._id) return;
+
+    const nextEnabled = !Boolean(user.signinRewardEnabled);
+    setBusyId(user._id);
+
+    try {
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${user._id}/signin-reward`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            enabled: nextEnabled,
+          }),
+        },
+      );
+
+      setRows((prev) =>
+        prev.map((u) =>
+          u._id === user._id
+            ? {
+                ...u,
+                signinRewardEnabled: data.signinRewardEnabled,
+              }
+            : u,
+        ),
+      );
+
+      setActionsModal((prev) =>
+        prev.user && prev.user._id === user._id
+          ? {
+              ...prev,
+              user: {
+                ...prev.user,
+                signinRewardEnabled: data.signinRewardEnabled,
+              },
+            }
+          : prev,
+      );
+
+      toast.success(
+        data.signinRewardEnabled
+          ? "Sign-in reward enabled"
+          : "Sign-in reward disabled",
+      );
+    } catch (e) {
+      toast.error(e.message || "Failed to update sign-in reward");
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   async function loadUsers(forceRefresh = true) {
     if (forceRefresh) {
       setLoading(true);
     }
-  
+
     try {
       const data = await fetchJSON(`${API_BASE}/api/admin/users`);
       const nextRows = uniqueUsers(data.users || []);
 
       setRows(nextRows);
-      
+
       saveUsersCache({
         rows: nextRows,
         savedAt: Date.now(),
@@ -936,16 +1013,19 @@ async function toggleSigninReward(user) {
     setBusyId(userId);
 
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/vip-rank`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ vipRank: num }),
-      });
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/vip-rank`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ vipRank: num }),
+        },
+      );
 
       const newRank = data?.user?.vipRank ?? data?.vipRank ?? num;
 
       setRows((prev) =>
-        prev.map((u) => (u._id === userId ? { ...u, vipRank: newRank } : u))
+        prev.map((u) => (u._id === userId ? { ...u, vipRank: newRank } : u)),
       );
 
       toast.success("VIP rank updated");
@@ -968,11 +1048,14 @@ async function toggleSigninReward(user) {
     setBusyId(userId);
 
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/orders/set`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ordersCompleted: num }),
-      });
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/orders/set`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ordersCompleted: num }),
+        },
+      );
 
       setRows((prev) =>
         prev.map((u) =>
@@ -981,8 +1064,8 @@ async function toggleSigninReward(user) {
                 ...u,
                 ordersCompleted: data.ordersCompleted ?? num,
               }
-            : u
-        )
+            : u,
+        ),
       );
 
       toast.success("Orders updated");
@@ -1005,18 +1088,21 @@ async function toggleSigninReward(user) {
     setBusyId(userId);
 
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/reset-count/set`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ totalResetCount: num }),
-      });
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/reset-count/set`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ totalResetCount: num }),
+        },
+      );
 
       setRows((prev) =>
         prev.map((u) =>
           u._id === userId
             ? { ...u, totalResetCount: data.totalResetCount ?? num }
-            : u
-        )
+            : u,
+        ),
       );
 
       toast.success("Reset count updated");
@@ -1031,9 +1117,12 @@ async function toggleSigninReward(user) {
     setBusyId(userId);
 
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/orders/reset`, {
-        method: "POST",
-      });
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/orders/reset`,
+        {
+          method: "POST",
+        },
+      );
 
       setRows((prev) =>
         prev.map((u) =>
@@ -1042,8 +1131,8 @@ async function toggleSigninReward(user) {
                 ...u,
                 ordersCompleted: data.ordersCompleted ?? 0,
               }
-            : u
-        )
+            : u,
+        ),
       );
 
       setOrderEdit((p) => ({ ...p, [userId]: "0" }));
@@ -1059,14 +1148,19 @@ async function toggleSigninReward(user) {
     setBusyId(userId);
 
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/role`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role }),
-      });
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/role`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role }),
+        },
+      );
 
       setRows((prev) =>
-        prev.map((u) => (u._id === userId ? { ...u, role: data.user.role } : u))
+        prev.map((u) =>
+          u._id === userId ? { ...u, role: data.user.role } : u,
+        ),
       );
 
       toast.success("Role updated");
@@ -1080,51 +1174,55 @@ async function toggleSigninReward(user) {
   async function submitBalance() {
     const userId = balanceModal.userId;
     if (!userId) return;
-  
+
     const amount = Number(balanceModal.amount);
-  
+
     if (!Number.isFinite(amount) || amount <= 0) {
       toast.error("Please enter a valid amount greater than 0.");
       return;
     }
-  
+
     setBusyId(userId);
-  
+
     try {
       const isBonus = balanceModal.creditType === "bonus";
-  
+
       const url = isBonus
         ? `${API_BASE}/api/admin/users/${userId}/bonus`
         : `${API_BASE}/api/admin/users/${userId}/balance`;
-  
+
       const body = isBonus
         ? {
             amount,
-            note: String(balanceModal.note || "Admin bonus").trim() || "Admin bonus",
+            note:
+              String(balanceModal.note || "Admin bonus").trim() ||
+              "Admin bonus",
           }
         : {
             mode: balanceModal.mode,
             amount,
           };
-  
+
       const data = await fetchJSON(url, {
         method: isBonus ? "POST" : "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-  
+
       if (data?.user?._id) {
         applyWalletUserUpdate(userId, data.user);
       }
-  
-      toast.success(isBonus ? "Bonus credited successfully" : "Balance updated");
+
+      toast.success(
+        isBonus ? "Bonus credited successfully" : "Balance updated",
+      );
       resetBalanceModal();
     } catch (e) {
       toast.error(
         e.message ||
           (balanceModal.creditType === "bonus"
             ? "Failed to credit bonus"
-            : "Failed to update balance")
+            : "Failed to update balance"),
       );
     } finally {
       setBusyId(null);
@@ -1134,28 +1232,31 @@ async function toggleSigninReward(user) {
   async function saveUserCreditScore(userId) {
     const val = creditScoreEdit[userId];
     const score = Number(val);
-  
+
     if (!Number.isFinite(score)) {
       toast.error("Credit score must be a number");
       return;
     }
-  
+
     if (score < 0 || score > 100) {
       toast.error("Credit score must be between 0 and 100");
       return;
     }
-  
+
     setBusyId(userId);
-  
+
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/credit-score`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ creditScore: score }),
-      });
-  
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/credit-score`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ creditScore: score }),
+        },
+      );
+
       const newScore = Number(data?.user?.creditScore ?? score);
-  
+
       setRows((prev) =>
         prev.map((u) =>
           u._id === userId
@@ -1163,10 +1264,10 @@ async function toggleSigninReward(user) {
                 ...u,
                 creditScore: newScore,
               }
-            : u
-        )
+            : u,
+        ),
       );
-  
+
       setActionsModal((prev) =>
         prev.user && prev.user._id === userId
           ? {
@@ -1176,14 +1277,14 @@ async function toggleSigninReward(user) {
                 creditScore: newScore,
               },
             }
-          : prev
+          : prev,
       );
-  
+
       setCreditScoreEdit((prev) => ({
         ...prev,
         [userId]: String(newScore),
       }));
-  
+
       toast.success("Credit score updated");
     } catch (e) {
       toast.error(e.message || "Failed to update credit score");
@@ -1196,7 +1297,9 @@ async function toggleSigninReward(user) {
     if (!user?._id) return;
 
     const nextBlocked = !Boolean(user.withdrawalBlocked);
-    const reason = nextBlocked ? String(customReason || "Manual review").trim() : "";
+    const reason = nextBlocked
+      ? String(customReason || "Manual review").trim()
+      : "";
 
     setBusyId(user._id);
 
@@ -1210,7 +1313,7 @@ async function toggleSigninReward(user) {
             blocked: nextBlocked,
             reason,
           }),
-        }
+        },
       );
 
       setRows((prev) =>
@@ -1222,8 +1325,8 @@ async function toggleSigninReward(user) {
                 withdrawalBlockedAt: data.user.withdrawalBlockedAt,
                 withdrawalBlockedReason: data.user.withdrawalBlockedReason,
               }
-            : u
-        )
+            : u,
+        ),
       );
 
       setActionsModal((prev) =>
@@ -1237,13 +1340,13 @@ async function toggleSigninReward(user) {
                 withdrawalBlockedReason: data.user.withdrawalBlockedReason,
               },
             }
-          : prev
+          : prev,
       );
 
       toast.success(
         data.user.withdrawalBlocked
           ? "Withdrawal frozen"
-          : "Withdrawal unfrozen"
+          : "Withdrawal unfrozen",
       );
     } catch (e) {
       toast.error(e.message || "Failed to update withdrawal block");
@@ -1259,14 +1362,17 @@ async function toggleSigninReward(user) {
     setBusyId(userId);
 
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/ban`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          isBanned: banModal.isBanned,
-          reason: banModal.reason,
-        }),
-      });
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/ban`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            isBanned: banModal.isBanned,
+            reason: banModal.reason,
+          }),
+        },
+      );
 
       setRows((prev) =>
         prev.map((u) =>
@@ -1277,8 +1383,8 @@ async function toggleSigninReward(user) {
                 bannedAt: data.user.bannedAt,
                 banReason: data.user.banReason,
               }
-            : u
-        )
+            : u,
+        ),
       );
 
       toast.success("Ban status updated");
@@ -1300,16 +1406,16 @@ async function toggleSigninReward(user) {
   async function submitOrderStartBlock() {
     const userId = orderStartBlockModal.userId;
     if (!userId) return;
-  
+
     const reason = String(orderStartBlockModal.reason || "").trim();
-  
+
     if (orderStartBlockModal.blocked && !reason) {
       toast.error("Please enter a ban order reason.");
       return;
     }
-  
+
     setBusyId(userId);
-  
+
     try {
       const data = await fetchJSON(
         `${API_BASE}/api/admin/users/${userId}/order-start-block`,
@@ -1320,9 +1426,9 @@ async function toggleSigninReward(user) {
             blocked: orderStartBlockModal.blocked,
             message: reason,
           }),
-        }
+        },
       );
-  
+
       setRows((prev) =>
         prev.map((u) =>
           u._id === userId
@@ -1332,10 +1438,10 @@ async function toggleSigninReward(user) {
                 orderStartBlockMessage: data.user.orderStartBlockMessage,
                 orderStartBlockedAt: data.user.orderStartBlockedAt,
               }
-            : u
-        )
+            : u,
+        ),
       );
-  
+
       setActionsModal((prev) =>
         prev.user && prev.user._id === userId
           ? {
@@ -1347,15 +1453,15 @@ async function toggleSigninReward(user) {
                 orderStartBlockedAt: data.user.orderStartBlockedAt,
               },
             }
-          : prev
+          : prev,
       );
-  
+
       toast.success(
         data.user.orderStartBlocked
           ? "User banned from starting orders"
-          : "User unbanned from starting orders"
+          : "User unbanned from starting orders",
       );
-  
+
       setOrderStartBlockModal({
         open: false,
         userId: null,
@@ -1423,7 +1529,7 @@ async function toggleSigninReward(user) {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ newPin: pin }),
-        }
+        },
       );
 
       setRows((prev) =>
@@ -1431,11 +1537,12 @@ async function toggleSigninReward(user) {
           u._id === userId
             ? {
                 ...u,
-                withdrawPinFailedAttempts: data?.user?.withdrawPinFailedAttempts ?? 0,
+                withdrawPinFailedAttempts:
+                  data?.user?.withdrawPinFailedAttempts ?? 0,
                 withdrawPinLocked: data?.user?.withdrawPinLocked ?? false,
               }
-            : u
-        )
+            : u,
+        ),
       );
 
       toast.success("Withdrawal PIN reset + unlocked");
@@ -1466,16 +1573,19 @@ async function toggleSigninReward(user) {
     setBusyId(userId);
 
     try {
-      const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/reset-phone`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ newPhoneNumber: clean }),
-      });
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/reset-phone`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ newPhoneNumber: clean }),
+        },
+      );
 
       setRows((prev) =>
         prev.map((u) =>
-          u._id === userId ? { ...u, phoneNumber: data.user.phoneNumber } : u
-        )
+          u._id === userId ? { ...u, phoneNumber: data.user.phoneNumber } : u,
+        ),
       );
 
       toast.success("Phone number updated");
@@ -1494,32 +1604,34 @@ async function toggleSigninReward(user) {
   }
 
   async function loadWalletSummary(userId) {
-  setWalletSummary({
-    loading: true,
-    userId,
-    totalDeposit: 0,
-    totalWithdrawal: 0,
-  });
-
-  try {
-    const data = await fetchJSON(`${API_BASE}/api/admin/users/${userId}/wallet-summary`);
-
     setWalletSummary({
-      loading: false,
-      userId,
-      totalDeposit: Number(data?.summary?.totalDeposit || 0),
-      totalWithdrawal: Number(data?.summary?.totalWithdrawal || 0),
-    });
-  } catch (e) {
-    setWalletSummary({
-      loading: false,
+      loading: true,
       userId,
       totalDeposit: 0,
       totalWithdrawal: 0,
     });
-    toast.error(e.message || "Failed to load wallet summary");
+
+    try {
+      const data = await fetchJSON(
+        `${API_BASE}/api/admin/users/${userId}/wallet-summary`,
+      );
+
+      setWalletSummary({
+        loading: false,
+        userId,
+        totalDeposit: Number(data?.summary?.totalDeposit || 0),
+        totalWithdrawal: Number(data?.summary?.totalWithdrawal || 0),
+      });
+    } catch (e) {
+      setWalletSummary({
+        loading: false,
+        userId,
+        totalDeposit: 0,
+        totalWithdrawal: 0,
+      });
+      toast.error(e.message || "Failed to load wallet summary");
+    }
   }
-}
 
   async function submitDelete() {
     const userId = deleteModal.userId;
@@ -1587,75 +1699,73 @@ async function toggleSigninReward(user) {
   useEffect(() => {
     const token = localStorage.getItem("admin_token");
     if (!token) return;
-  
+
     const socket = io(API_BASE);
-  
+
     socket.on("connect", () => {
       console.log("[Users Socket] connected:", socket.id);
       socket.emit("admin:join");
     });
-  
+
     socket.on("admin:userCreated", ({ user }) => {
       if (!user?._id) return;
-  
+
       console.log("[Users Socket] admin:userCreated:", user);
-  
+
       setRows((prev) => uniqueUsers([user, ...prev]));
-  
+
       toast.success("New user registered");
     });
-  
+
     socket.on("admin:userBalanceUpdated", ({ userId, user }) => {
       console.log("[Users Socket] admin:userBalanceUpdated received:", {
         userId,
         user,
       });
-    
+
       if (!userId && !user?._id) return;
-    
+
       const id = String(userId || user._id);
-    
+
       setRows((prev) =>
         prev.map((u) =>
           String(u._id) === id
             ? {
                 ...u,
                 balance: Number(user?.balance ?? u.balance ?? 0),
-    
+
                 displayBalance: Number(
                   user?.displayBalance ??
                     user?.shortBalance ??
                     user?.balance ??
                     u.displayBalance ??
                     u.balance ??
-                    0
+                    0,
                 ),
-    
+
                 availableBalance: Number(
                   user?.availableBalance ??
                     u.availableBalance ??
                     user?.balance ??
-                    0
+                    0,
                 ),
-    
+
                 shortBalance: Number(
                   user?.shortBalance ??
                     user?.displayBalance ??
                     u.shortBalance ??
                     u.displayBalance ??
-                    0
+                    0,
                 ),
-    
+
                 pendingAmount: Number(
-                  user?.pendingAmount ??
-                    u.pendingAmount ??
-                    0
+                  user?.pendingAmount ?? u.pendingAmount ?? 0,
                 ),
               }
-            : u
-        )
+            : u,
+        ),
       );
-    
+
       setActionsModal((prev) =>
         prev.user && String(prev.user._id) === id
           ? {
@@ -1663,83 +1773,88 @@ async function toggleSigninReward(user) {
               user: {
                 ...prev.user,
                 balance: Number(user?.balance ?? prev.user.balance ?? 0),
-    
+
                 displayBalance: Number(
                   user?.displayBalance ??
                     user?.shortBalance ??
                     user?.balance ??
                     prev.user.displayBalance ??
                     prev.user.balance ??
-                    0
+                    0,
                 ),
-    
+
                 availableBalance: Number(
                   user?.availableBalance ??
                     prev.user.availableBalance ??
                     user?.balance ??
-                    0
+                    0,
                 ),
-    
+
                 shortBalance: Number(
                   user?.shortBalance ??
                     user?.displayBalance ??
                     prev.user.shortBalance ??
                     prev.user.displayBalance ??
-                    0
+                    0,
                 ),
-    
+
                 pendingAmount: Number(
-                  user?.pendingAmount ??
-                    prev.user.pendingAmount ??
-                    0
+                  user?.pendingAmount ?? prev.user.pendingAmount ?? 0,
                 ),
               },
             }
-          : prev
+          : prev,
       );
     });
 
-    socket.on("admin:userOrdersUpdated", ({ userId, ordersCompleted, ordersLimit }) => {
-      if (!userId) return;
-    
-      const id = String(userId);
-    
-      setRows((prev) =>
-        prev.map((u) =>
-          String(u._id) === id
+    socket.on(
+      "admin:userOrdersUpdated",
+      ({ userId, ordersCompleted, ordersLimit }) => {
+        if (!userId) return;
+
+        const id = String(userId);
+
+        setRows((prev) =>
+          prev.map((u) =>
+            String(u._id) === id
+              ? {
+                  ...u,
+                  ordersCompleted: Number(
+                    ordersCompleted ?? u.ordersCompleted ?? 0,
+                  ),
+                  ordersLimit: Number(ordersLimit ?? u.ordersLimit ?? 40),
+                }
+              : u,
+          ),
+        );
+
+        setActionsModal((prev) =>
+          prev.user && String(prev.user._id) === id
             ? {
-                ...u,
-                ordersCompleted: Number(ordersCompleted ?? u.ordersCompleted ?? 0),
-                ordersLimit: Number(ordersLimit ?? u.ordersLimit ?? 40),
+                ...prev,
+                user: {
+                  ...prev.user,
+                  ordersCompleted: Number(
+                    ordersCompleted ?? prev.user.ordersCompleted ?? 0,
+                  ),
+                  ordersLimit: Number(
+                    ordersLimit ?? prev.user.ordersLimit ?? 40,
+                  ),
+                },
               }
-            : u
-        )
-      );
-    
-      setActionsModal((prev) =>
-        prev.user && String(prev.user._id) === id
-          ? {
-              ...prev,
-              user: {
-                ...prev.user,
-                ordersCompleted: Number(
-                  ordersCompleted ?? prev.user.ordersCompleted ?? 0
-                ),
-                ordersLimit: Number(ordersLimit ?? prev.user.ordersLimit ?? 40),
-              },
-            }
-          : prev
-      );
-    });
-  
+            : prev,
+        );
+      },
+    );
+
     socket.on("disconnect", (reason) => {
       console.log("[Users Socket] disconnected:", reason);
     });
-  
+
     socket.on("connect_error", (err) => {
       console.error("[Users Socket] connect_error:", err.message);
     });
-  
+
     return () => {
       socket.off("admin:userCreated");
       socket.off("admin:userBalanceUpdated");
@@ -1776,18 +1891,26 @@ async function toggleSigninReward(user) {
       return;
     }
 
-  loadUsers(true);
-}, []);
+    loadUsers(true);
+  }, []);
 
   const filtered = useMemo(() => {
     const qq = q.trim().toLowerCase();
     return rows.filter((u) => {
       const matchesQuery =
         !qq ||
-        String(u.phoneNumber || "").toLowerCase().includes(qq) ||
-        String(u.uid || "").toLowerCase().includes(qq) ||
-        String(u._id || "").toLowerCase().includes(qq) ||
-        String(u.registeredIp || "").toLowerCase().includes(qq);
+        String(u.phoneNumber || "")
+          .toLowerCase()
+          .includes(qq) ||
+        String(u.uid || "")
+          .toLowerCase()
+          .includes(qq) ||
+        String(u._id || "")
+          .toLowerCase()
+          .includes(qq) ||
+        String(u.registeredIp || "")
+          .toLowerCase()
+          .includes(qq);
 
       const matchesRole =
         roleFilter === "all" ? true : String(u.role) === roleFilter;
@@ -1803,7 +1926,7 @@ async function toggleSigninReward(user) {
   const sortedFiltered = useMemo(() => {
     return sortUsersList(filtered, sortBy);
   }, [filtered, sortBy]);
-  
+
   const totalPages = Math.max(1, Math.ceil(sortedFiltered.length / pageSize));
 
   useEffect(() => {
@@ -1816,24 +1939,24 @@ async function toggleSigninReward(user) {
     const start = (page - 1) * pageSize;
     return sortedFiltered.slice(start, start + pageSize);
   }, [sortedFiltered, page, pageSize]);
-  
+
   const modalAmount = safeNum(balanceModal.amount);
   const modalCurrentBalance = safeNum(balanceModal.currentBalance);
-  
+
   const balancePreviewAfter =
     balanceModal.creditType === "bonus"
       ? modalCurrentBalance + modalAmount
       : balanceModal.mode === "set"
-      ? modalAmount
-      : balanceModal.mode === "dec"
-      ? modalCurrentBalance - modalAmount
-      : modalCurrentBalance + modalAmount;
-  
+        ? modalAmount
+        : balanceModal.mode === "dec"
+          ? modalCurrentBalance - modalAmount
+          : modalCurrentBalance + modalAmount;
+
   const balancePreviewLabel =
     balanceModal.creditType === "bonus"
       ? "Balance After Bonus"
       : "Balance After Deposit";
-  
+
   return (
     <Shell title="User Management">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -1901,14 +2024,11 @@ async function toggleSigninReward(user) {
           >
             Refresh
           </button>
-
         </div>
       </div>
 
       <div className={tableWrapClass}>
-        <div className={tableHeaderBarClass}>
-          Users ({filtered.length})
-        </div>
+        <div className={tableHeaderBarClass}>Users ({filtered.length})</div>
 
         {/* only inner table scrolls horizontally */}
         <div className="users-table-scroll overflow-x-auto">
@@ -1994,7 +2114,7 @@ async function toggleSigninReward(user) {
 
                       {/* invited by */}
                       <td className="px-4 py-3">
-                       <div
+                        <div
                           className={`max-w-[140px] truncate text-xs ${softText}`}
                           title={u?.referredBy?.phoneNumber || "-"}
                         >
@@ -2015,18 +2135,22 @@ async function toggleSigninReward(user) {
                               className="h-[14px] w-[18px] rounded-[2px] object-cover"
                               loading="lazy"
                             />
-                            <span>{String(u.registeredCountry).toUpperCase()}</span>
+                            <span>
+                              {String(u.registeredCountry).toUpperCase()}
+                            </span>
                           </div>
                         ) : (
                           <div className={`text-xs ${softText}`}>-</div>
                         )}
                       </td>
-                      
+
                       {/* pending balance */}
                       <td className="px-4 py-3">
-                        <div className={`  text-xs ${
-                          theme === "dark" ? "text-blue-200" : "text-blue-700"
-                        }`}>
+                        <div
+                          className={`  text-xs ${
+                            theme === "dark" ? "text-blue-200" : "text-blue-700"
+                          }`}
+                        >
                           {formatMoney(u.pendingAmount)}
                         </div>
                       </td>
@@ -2047,7 +2171,9 @@ async function toggleSigninReward(user) {
                               open: true,
                               userId: u._id,
                               uid: u.uid || "",
-                              currentBalance: safeNum(u.displayBalance ?? u.balance),
+                              currentBalance: safeNum(
+                                u.displayBalance ?? u.balance,
+                              ),
                               creditType: "balance",
                               mode: "inc",
                               amount: "",
@@ -2069,17 +2195,24 @@ async function toggleSigninReward(user) {
                       <td className="px-4 py-3">
                         <div className={`text-xs ${strongText}`}>
                           {safeNum(u.ordersCompleted)}/
-                          {Number.isFinite(Number(u.ordersLimit)) ? Number(u.ordersLimit) : "-"}
+                          {Number.isFinite(Number(u.ordersLimit))
+                            ? Number(u.ordersLimit)
+                            : "-"}
                         </div>
                       </td>
-                      
+
                       {/* order controls */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <input
-                            value={orderEdit[u._id] ?? String(u.ordersCompleted ?? 0)}
+                            value={
+                              orderEdit[u._id] ?? String(u.ordersCompleted ?? 0)
+                            }
                             onChange={(e) =>
-                              setOrderEdit((p) => ({ ...p, [u._id]: e.target.value }))
+                              setOrderEdit((p) => ({
+                                ...p,
+                                [u._id]: e.target.value,
+                              }))
                             }
                             className={
                               theme === "dark"
@@ -2089,7 +2222,7 @@ async function toggleSigninReward(user) {
                             placeholder="0"
                             disabled={isBusy}
                           />
-                      
+
                           <button
                             disabled={isBusy}
                             onClick={() => saveUserOrders(u._id)}
@@ -2102,7 +2235,7 @@ async function toggleSigninReward(user) {
                           >
                             Save
                           </button>
-                      
+
                           <button
                             disabled={isBusy}
                             onClick={() => resetUserOrdersCount(u._id)}
@@ -2126,9 +2259,14 @@ async function toggleSigninReward(user) {
                           </div>
 
                           <input
-                            value={resetEdit[u._id] ?? String(u.totalResetCount ?? 1)}
+                            value={
+                              resetEdit[u._id] ?? String(u.totalResetCount ?? 1)
+                            }
                             onChange={(e) =>
-                              setResetEdit((p) => ({ ...p, [u._id]: e.target.value }))
+                              setResetEdit((p) => ({
+                                ...p,
+                                [u._id]: e.target.value,
+                              }))
                             }
                             className={
                               theme === "dark"
@@ -2182,7 +2320,7 @@ async function toggleSigninReward(user) {
                               ? "border border-white/10 bg-white/5 text-white/80"
                               : "border border-gray-200 bg-gray-50 text-gray-700"
                           }`}
->
+                        >
                           {u.role || "-"}
                         </span>
                       </td>
@@ -2198,9 +2336,10 @@ async function toggleSigninReward(user) {
         <div className={footerBarClass}>
           <div className={`text-xs ${mutedText}`}>
             Showing {filtered.length === 0 ? 0 : (page - 1) * pageSize + 1} to{" "}
-            {Math.min(page * pageSize, filtered.length)} of {filtered.length} users
+            {Math.min(page * pageSize, filtered.length)} of {filtered.length}{" "}
+            users
           </div>
-        
+
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <div className="flex items-center gap-2">
               <span className={`text-xs ${mutedText}`}>Per page</span>
@@ -2219,7 +2358,7 @@ async function toggleSigninReward(user) {
                 ]}
               />
             </div>
-        
+
             <div className="flex items-center gap-2">
               <button
                 disabled={page <= 1}
@@ -2228,11 +2367,11 @@ async function toggleSigninReward(user) {
               >
                 Prev
               </button>
-        
+
               <div className={`text-xs ${softText}`}>
                 Page {totalPages === 0 ? 1 : page} / {totalPages}
               </div>
-        
+
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
@@ -2244,7 +2383,7 @@ async function toggleSigninReward(user) {
           </div>
         </div>
       </div>
-  
+
       <Modal
         open={withdrawalBlockModal.open}
         title="Freeze Withdrawal"
@@ -2282,18 +2421,20 @@ async function toggleSigninReward(user) {
             >
               Cancel
             </button>
-      
+
             <button
               disabled={busyId === withdrawalBlockModal.userId}
               onClick={async () => {
-                const user = rows.find((x) => x._id === withdrawalBlockModal.userId);
+                const user = rows.find(
+                  (x) => x._id === withdrawalBlockModal.userId,
+                );
                 if (!user) {
                   toast.error("User not found");
                   return;
                 }
-      
+
                 await toggleWithdrawalBlock(user, withdrawalBlockModal.reason);
-      
+
                 setWithdrawalBlockModal({
                   open: false,
                   userId: null,
@@ -2308,7 +2449,9 @@ async function toggleSigninReward(user) {
                   : "rounded-xl border border-orange-200 bg-orange-50 px-4 py-2 text-xs text-orange-700 hover:bg-orange-100 disabled:opacity-50"
               }
             >
-              {busyId === withdrawalBlockModal.userId ? "Saving..." : "Confirm Freeze"}
+              {busyId === withdrawalBlockModal.userId
+                ? "Saving..."
+                : "Confirm Freeze"}
             </button>
           </div>
         }
@@ -2323,7 +2466,7 @@ async function toggleSigninReward(user) {
           >
             This will block the user from creating withdrawals.
           </div>
-      
+
           <div
             className={
               theme === "dark"
@@ -2340,11 +2483,14 @@ async function toggleSigninReward(user) {
             >
               Reason
             </div>
-      
+
             <input
               value={withdrawalBlockModal.reason}
               onChange={(e) =>
-                setWithdrawalBlockModal((p) => ({ ...p, reason: e.target.value }))
+                setWithdrawalBlockModal((p) => ({
+                  ...p,
+                  reason: e.target.value,
+                }))
               }
               placeholder="Example: Risk review / Suspicious activity / Manual hold"
               className={
@@ -2376,7 +2522,7 @@ async function toggleSigninReward(user) {
             >
               Cancel
             </button>
-      
+
             <button
               type="button"
               disabled={busyId === balanceModal.userId}
@@ -2387,15 +2533,15 @@ async function toggleSigninReward(user) {
                     ? "border border-emerald-400/20 bg-emerald-400/10 text-emerald-200 hover:bg-emerald-400/15"
                     : "border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                   : theme === "dark"
-                  ? "border border-white/10 bg-white text-slate-900 hover:bg-white/90"
-                  : "border border-gray-900 bg-gray-900 text-white hover:bg-gray-800"
+                    ? "border border-white/10 bg-white text-slate-900 hover:bg-white/90"
+                    : "border border-gray-900 bg-gray-900 text-white hover:bg-gray-800"
               }`}
             >
               {busyId === balanceModal.userId
                 ? "Processing..."
                 : balanceModal.creditType === "bonus"
-                ? "Credit Bonus"
-                : "Update Balance"}
+                  ? "Credit Bonus"
+                  : "Update Balance"}
             </button>
           </div>
         }
@@ -2422,13 +2568,13 @@ async function toggleSigninReward(user) {
                     ? "bg-white text-slate-900"
                     : "bg-gray-900 text-white"
                   : theme === "dark"
-                  ? "text-white/60 hover:bg-white/5"
-                  : "text-gray-500 hover:bg-white"
+                    ? "text-white/60 hover:bg-white/5"
+                    : "text-gray-500 hover:bg-white"
               }`}
             >
               Manual Balance
             </button>
-      
+
             <button
               type="button"
               onClick={() =>
@@ -2444,14 +2590,14 @@ async function toggleSigninReward(user) {
                     ? "bg-emerald-400 text-slate-950"
                     : "bg-emerald-600 text-white"
                   : theme === "dark"
-                  ? "text-white/60 hover:bg-white/5"
-                  : "text-gray-500 hover:bg-white"
+                    ? "text-white/60 hover:bg-white/5"
+                    : "text-gray-500 hover:bg-white"
               }`}
             >
               Bonus Credit
             </button>
           </div>
-      
+
           <div
             className={`rounded-2xl border p-4 ${
               theme === "dark"
@@ -2464,10 +2610,12 @@ async function toggleSigninReward(user) {
               {formatMoney(balanceModal.currentBalance)}
             </div>
           </div>
-      
+
           {balanceModal.creditType === "balance" ? (
             <div>
-              <div className={`text-xs font-semibold ${strongText}`}>Operation</div>
+              <div className={`text-xs font-semibold ${strongText}`}>
+                Operation
+              </div>
               <div className="mt-2">
                 <SelectMenu
                   value={balanceModal.mode}
@@ -2502,14 +2650,16 @@ async function toggleSigninReward(user) {
               </div>
               <div
                 className={`mt-1 text-[11px] ${
-                  theme === "dark" ? "text-emerald-100/70" : "text-emerald-700/70"
+                  theme === "dark"
+                    ? "text-emerald-100/70"
+                    : "text-emerald-700/70"
                 }`}
               >
                 Credit users account with bonus.
               </div>
             </div>
           )}
-      
+
           <div>
             <div className={`text-xs font-semibold ${strongText}`}>Amount</div>
             <input
@@ -2525,7 +2675,7 @@ async function toggleSigninReward(user) {
               className={`mt-2 ${inputClass}`}
             />
           </div>
-      
+
           <div
             className={`rounded-3xl border p-4 ${
               theme === "dark"
@@ -2541,12 +2691,14 @@ async function toggleSigninReward(user) {
                     : "border-gray-200 bg-gray-50"
                 }`}
               >
-                <div className={`text-[11px] ${mutedText}`}>Current Balance</div>
+                <div className={`text-[11px] ${mutedText}`}>
+                  Current Balance
+                </div>
                 <div className={`mt-1 text-sm font-semibold ${strongText}`}>
                   {formatMoney(modalCurrentBalance)}
                 </div>
               </div>
-          
+
               <div
                 className={`rounded-2xl border p-3 ${
                   theme === "dark"
@@ -2559,7 +2711,7 @@ async function toggleSigninReward(user) {
                   {formatMoney(modalAmount)}
                 </div>
               </div>
-          
+
               <div
                 className={`rounded-2xl border p-3 sm:col-span-2 ${
                   balanceModal.creditType === "bonus"
@@ -2567,8 +2719,8 @@ async function toggleSigninReward(user) {
                       ? "border-emerald-400/20 bg-emerald-400/10"
                       : "border-emerald-200 bg-emerald-50"
                     : theme === "dark"
-                    ? "border-blue-400/20 bg-blue-400/10"
-                    : "border-blue-200 bg-blue-50"
+                      ? "border-blue-400/20 bg-blue-400/10"
+                      : "border-blue-200 bg-blue-50"
                 }`}
               >
                 <div
@@ -2578,13 +2730,13 @@ async function toggleSigninReward(user) {
                         ? "text-emerald-200/70"
                         : "text-emerald-700/70"
                       : theme === "dark"
-                      ? "text-blue-200/70"
-                      : "text-blue-700/70"
+                        ? "text-blue-200/70"
+                        : "text-blue-700/70"
                   }`}
                 >
                   {balancePreviewLabel}
                 </div>
-          
+
                 <div
                   className={`font-semibold ${
                     balanceModal.creditType === "bonus"
@@ -2592,8 +2744,8 @@ async function toggleSigninReward(user) {
                         ? "text-emerald-100"
                         : "text-emerald-700"
                       : theme === "dark"
-                      ? "text-blue-100"
-                      : "text-blue-700"
+                        ? "text-blue-100"
+                        : "text-blue-700"
                   }`}
                 >
                   {formatMoney(balancePreviewAfter)}
@@ -2626,62 +2778,127 @@ async function toggleSigninReward(user) {
         {actionsModal.user ? (
           <div className="space-y-5">
             {/* top summary */}
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
               <div className={drawerCardClass}>
                 <div className={drawerLabelClass}>UID</div>
-                <div className={`${drawerValueClass}`}>
+                <div className={drawerValueClass}>
                   {actionsModal.user.uid || "-"}
                 </div>
               </div>
-            
+
               <div className={drawerCardClass}>
-                <div className="flex items-center justify-between gap-3">
-                  <div className={drawerLabelClass}>Withdrawal Status</div>
-                  <div className={statusPlainClass}>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className={drawerLabelClass}>Withdrawal Status</div>
+
+                    {actionsModal.user.withdrawalBlocked ? (
+                      <div className={`mt-2 ${drawerMutedClass}`}>
+                        Reason:{" "}
+                        {actionsModal.user.withdrawalBlockedReason || "-"}
+                      </div>
+                    ) : null}
+
+                    {actionsModal.user.withdrawalBlockedAt ? (
+                      <div className={`mt-1 ${drawerMutedClass}`}>
+                        Since:{" "}
+                        {formatDate(actionsModal.user.withdrawalBlockedAt)}
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <span
+                    className={
+                      actionsModal.user.withdrawalBlocked
+                        ? theme === "dark"
+                          ? "rounded-full border border-orange-400/30 bg-orange-500/15 px-3 py-1 text-[10px] font-semibold text-orange-200"
+                          : "rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-[10px] font-semibold text-orange-700"
+                        : theme === "dark"
+                          ? "rounded-full border border-emerald-400/30 bg-emerald-500/15 px-3 py-1 text-[10px] font-semibold text-emerald-200"
+                          : "rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-[10px] font-semibold text-gray-700"
+                    }
+                  >
                     {actionsModal.user.withdrawalBlocked ? "FROZEN" : "ACTIVE"}
-                  </div>
+                  </span>
                 </div>
-            
-                {actionsModal.user.withdrawalBlockedReason ? (
-                  <div className={`mt-2 ${drawerMutedClass}`}>
-                    Reason: {actionsModal.user.withdrawalBlockedReason}
-                  </div>
-                ) : null}
-            
-                {actionsModal.user.withdrawalBlockedAt ? (
-                  <div className={`mt-1 ${drawerMutedClass}`}>
-                    Since: {formatDate(actionsModal.user.withdrawalBlockedAt)}
-                  </div>
-                ) : null}
               </div>
+
+              <button
+                disabled={busyId === actionsModal.user._id}
+                onClick={() => toggleUserVerification(actionsModal.user)}
+                className={`text-left transition disabled:opacity-50 ${drawerCardClass} ${
+                  theme === "dark"
+                    ? "hover:bg-white/[0.07]"
+                    : "hover:bg-gray-50"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className={drawerLabelClass}>Verification</div>
+
+                    <div className={`mt-2 text-sm font-semibold ${strongText}`}>
+                      {actionsModal.user.isVerified
+                        ? "Verified User"
+                        : "Unverified User"}
+                    </div>
+
+                    <div className={`mt-1 ${drawerMutedClass}`}>
+                      {actionsModal.user.isVerified
+                        ? "Click to remove verified badge"
+                        : "Click to verify this user"}
+                    </div>
+
+                    {actionsModal.user.verifiedAt ? (
+                      <div className={`mt-1 ${drawerMutedClass}`}>
+                        Since: {formatDate(actionsModal.user.verifiedAt)}
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <span
+                    className={
+                      actionsModal.user.isVerified
+                        ? theme === "dark"
+                          ? "rounded-full border border-emerald-400/30 bg-emerald-500/15 px-3 py-1 text-[10px] font-semibold text-emerald-200"
+                          : "rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[10px] font-semibold text-emerald-700"
+                        : theme === "dark"
+                          ? "rounded-full border border-orange-400/30 bg-orange-500/15 px-3 py-1 text-[10px] font-semibold text-orange-200"
+                          : "rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-[10px] font-semibold text-orange-700"
+                    }
+                  >
+                    {actionsModal.user.isVerified ? "VERIFIED" : "UNVERIFIED"}
+                  </span>
+                </div>
+              </button>
             </div>
-      
+
             {/* wallet stats */}
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div className={drawerCardClass}>
                 <div className={drawerLabelClass}>Total Deposit</div>
                 <div className={`mt-2   text-2xl font-semibold ${strongText}`}>
-                  {walletSummary.loading && walletSummary.userId === actionsModal.user._id
+                  {walletSummary.loading &&
+                  walletSummary.userId === actionsModal.user._id
                     ? "..."
                     : safeNum(walletSummary.totalDeposit).toFixed(2)}
                 </div>
               </div>
-      
+
               <div className={drawerCardClass}>
                 <div className={drawerLabelClass}>Total Withdrawal</div>
                 <div className={`mt-2   text-2xl font-semibold ${strongText}`}>
-                  {walletSummary.loading && walletSummary.userId === actionsModal.user._id
+                  {walletSummary.loading &&
+                  walletSummary.userId === actionsModal.user._id
                     ? "..."
                     : safeNum(walletSummary.totalWithdrawal).toFixed(2)}
                 </div>
               </div>
             </div>
-      
+
             {/* vip + pin */}
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
               <div className={drawerSectionClass}>
                 <div className={drawerLabelClass}>VIP Ranking</div>
-      
+
                 <div className="mt-3 flex items-center gap-2">
                   <SelectMenu
                     disabled={busyId === actionsModal.user._id}
@@ -2702,23 +2919,25 @@ async function toggleSigninReward(user) {
                       { value: "3", label: "Rank 3" },
                     ]}
                   />
-      
+
                   <button
                     disabled={busyId === actionsModal.user._id}
                     onClick={async () => {
                       const id = actionsModal.user._id;
                       await saveUserVipRank(id);
-      
+
                       setActionsModal((prev) =>
                         prev.user
                           ? {
                               ...prev,
                               user: {
                                 ...prev.user,
-                                vipRank: Number(vipEdit[id] ?? prev.user.vipRank ?? 1),
+                                vipRank: Number(
+                                  vipEdit[id] ?? prev.user.vipRank ?? 1,
+                                ),
                               },
                             }
-                          : prev
+                          : prev,
                       );
                     }}
                     className={`rounded-xl border px-3 py-2 text-xs disabled:opacity-50 ${
@@ -2731,48 +2950,58 @@ async function toggleSigninReward(user) {
                   </button>
                 </div>
               </div>
-      
+
               <div className={drawerSectionClass}>
                 <div className={drawerLabelClass}>Withdrawal PIN</div>
-      
+
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <div className={pillNeutralClass}>
                     Locked:{" "}
                     <span
-                      className={theme === "dark" ? "text-white" : "text-gray-900"}
+                      className={
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }
                     >
                       {actionsModal.user.withdrawPinLocked ? "YES" : "NO"}
                     </span>
                   </div>
-      
+
                   <div className={pillNeutralClass}>
                     Attempts left:{" "}
-                    <span className={theme === "dark" ? "text-white" : "text-gray-900"}>
+                    <span
+                      className={
+                        theme === "dark" ? "text-white" : "text-gray-900"
+                      }
+                    >
                       {Math.max(
                         0,
-                        3 - Number(actionsModal.user.withdrawPinFailedAttempts || 0)
+                        3 -
+                          Number(
+                            actionsModal.user.withdrawPinFailedAttempts || 0,
+                          ),
                       )}
                     </span>
                   </div>
-      
+
                   <div className={pillNeutralClass}>
-                    Failed: {Number(actionsModal.user.withdrawPinFailedAttempts || 0)}
+                    Failed:{" "}
+                    {Number(actionsModal.user.withdrawPinFailedAttempts || 0)}
                   </div>
                 </div>
               </div>
             </div>
-      
+
             {/* primary actions */}
             <div className={drawerSectionClass}>
               <div className={drawerLabelClass}>Account Actions</div>
-      
+
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <button
                   disabled={busyId === actionsModal.user._id}
                   onClick={() => {
                     const u = actionsModal.user;
                     setActionsModal({ open: false, user: null });
-      
+
                     setWithdrawPinModal({
                       open: true,
                       userId: u._id,
@@ -2787,13 +3016,13 @@ async function toggleSigninReward(user) {
                     Reset attempts back to 3
                   </div>
                 </button>
-      
+
                 <button
                   disabled={busyId === actionsModal.user._id}
                   onClick={() => {
                     const u = actionsModal.user;
                     setActionsModal({ open: false, user: null });
-      
+
                     setPasswordModal({
                       open: true,
                       userId: u._id,
@@ -2808,13 +3037,13 @@ async function toggleSigninReward(user) {
                     Set a new password for the user
                   </div>
                 </button>
-      
+
                 <button
                   disabled={busyId === actionsModal.user._id}
                   onClick={() => {
                     const u = actionsModal.user;
                     setActionsModal({ open: false, user: null });
-      
+
                     setPhoneModal({
                       open: true,
                       userId: u._id,
@@ -2825,30 +3054,39 @@ async function toggleSigninReward(user) {
                   className={drawerNeutralButtonClass}
                 >
                   <div className="font-semibold">Reset Phone Number</div>
-                  <div className={`mt-1 ${drawerMutedClass}`}>Update phone number</div>
+                  <div className={`mt-1 ${drawerMutedClass}`}>
+                    Update phone number
+                  </div>
                 </button>
-      
+
                 <button
                   disabled={busyId === actionsModal.user._id}
                   onClick={async () => {
                     const u = actionsModal.user;
                     setActionsModal({ open: false, user: null });
-                    await changeRole(u._id, u.role === "admin" ? "user" : "admin");
+                    await changeRole(
+                      u._id,
+                      u.role === "admin" ? "user" : "admin",
+                    );
                   }}
                   className={drawerNeutralButtonClass}
                 >
                   <div className="font-semibold">
-                    {actionsModal.user.role === "admin" ? "Make User" : "Make Admin"}
+                    {actionsModal.user.role === "admin"
+                      ? "Make User"
+                      : "Make Admin"}
                   </div>
-                  <div className={`mt-1 ${drawerMutedClass}`}>Change user role</div>
+                  <div className={`mt-1 ${drawerMutedClass}`}>
+                    Change user role
+                  </div>
                 </button>
               </div>
             </div>
-      
+
             {/* growth / engagement */}
             <div className={drawerSectionClass}>
               <div className={drawerLabelClass}>Growth & Campaigns</div>
-      
+
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <button
                   disabled={busyId === actionsModal.user._id}
@@ -2857,8 +3095,8 @@ async function toggleSigninReward(user) {
                     setActionsModal({ open: false, user: null });
                     navigate(
                       `/admin/orders/bonus?uid=${encodeURIComponent(u.uid)}&currentOrder=${encodeURIComponent(
-                        Number(u.ordersCompleted || 0)
-                      )}`
+                        Number(u.ordersCompleted || 0),
+                      )}`,
                     );
                   }}
                   className={`${actionPlainClass} disabled:opacity-50`}
@@ -2868,7 +3106,7 @@ async function toggleSigninReward(user) {
                     Assign a bonus order for user
                   </div>
                 </button>
-      
+
                 <button
                   disabled={busyId === actionsModal.user._id}
                   onClick={() => {
@@ -2876,8 +3114,8 @@ async function toggleSigninReward(user) {
                     setActionsModal({ open: false, user: null });
                     navigate(
                       `/admin/lucky-draw?uid=${encodeURIComponent(u.uid)}&currentOrder=${encodeURIComponent(
-                        Number(u.ordersCompleted || 0)
-                      )}`
+                        Number(u.ordersCompleted || 0),
+                      )}`,
                     );
                   }}
                   className={`${actionPlainClass} disabled:opacity-50`}
@@ -2887,13 +3125,15 @@ async function toggleSigninReward(user) {
                     Assign a lucky draw trigger
                   </div>
                 </button>
-      
+
                 <button
                   disabled={busyId === actionsModal.user._id}
                   onClick={() => {
                     const u = actionsModal.user;
                     setActionsModal({ open: false, user: null });
-                    navigate(`/admin/bonus-credit?userId=${u._id}&uid=${u.uid || ""}`);
+                    navigate(
+                      `/admin/bonus-credit?userId=${u._id}&uid=${u.uid || ""}`,
+                    );
                   }}
                   className={`${actionPlainClass} disabled:opacity-50`}
                 >
@@ -2904,19 +3144,21 @@ async function toggleSigninReward(user) {
                 </button>
               </div>
             </div>
-      
+
             {/* Other actions & risk */}
             <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
               <div className={drawerSectionClass}>
                 <div className={drawerLabelClass}>Other Actions</div>
-            
+
                 <div className="mt-3 grid grid-cols-1 gap-3">
                   <button
                     disabled={busyId === actionsModal.user._id}
                     onClick={() => {
                       const u = actionsModal.user;
                       setActionsModal({ open: false, user: null });
-                      navigate(`/admin/chat?userId=${encodeURIComponent(u._id)}`);
+                      navigate(
+                        `/admin/chat?userId=${encodeURIComponent(u._id)}`,
+                      );
                     }}
                     className={`${actionPlainClass} disabled:opacity-50`}
                   >
@@ -2925,7 +3167,7 @@ async function toggleSigninReward(user) {
                       Open support chat with this user
                     </div>
                   </button>
-            
+
                   <button
                     disabled={busyId === actionsModal.user._id}
                     onClick={() => goToTrialBonus(actionsModal.user)}
@@ -2942,7 +3184,7 @@ async function toggleSigninReward(user) {
                     onClick={() => {
                       const u = actionsModal.user;
                       const currentlyBlocked = Boolean(u.orderStartBlocked);
-                  
+
                       // If already banned from orders, unban directly.
                       if (currentlyBlocked) {
                         setOrderStartBlockModal({
@@ -2954,10 +3196,10 @@ async function toggleSigninReward(user) {
                         });
                         return;
                       }
-                  
+
                       // If not banned, open modal and force admin to enter reason.
                       setActionsModal({ open: false, user: null });
-                  
+
                       setOrderStartBlockModal({
                         open: true,
                         userId: u._id,
@@ -2969,21 +3211,24 @@ async function toggleSigninReward(user) {
                     className={`${actionPlainClass} disabled:opacity-50`}
                   >
                     <div className="font-semibold">
-                      {actionsModal.user.orderStartBlocked ? "Unban Orders" : "Ban Orders"}
+                      {actionsModal.user.orderStartBlocked
+                        ? "Unban Orders"
+                        : "Ban Orders"}
                     </div>
-                  
+
                     <div className="mt-1 text-[11px] opacity-70">
                       {actionsModal.user.orderStartBlocked
                         ? "Allow this user to start orders again"
                         : "Block this user from clicking Start Order"}
                     </div>
-                  
+
                     {actionsModal.user.orderStartBlocked ? (
                       <div className={`mt-2 ${drawerMutedClass}`}>
-                        Reason: {actionsModal.user.orderStartBlockMessage || "-"}
+                        Reason:{" "}
+                        {actionsModal.user.orderStartBlockMessage || "-"}
                       </div>
                     ) : null}
-                                    </button>
+                  </button>
 
                   <button
                     disabled={busyId === actionsModal.user._id}
@@ -2999,13 +3244,12 @@ async function toggleSigninReward(user) {
                       Open platform as this user
                     </div>
                   </button>
-
                 </div>
               </div>
-            
+
               <div className={drawerSectionClass}>
                 <div className={drawerLabelClass}>Risk Controls</div>
-            
+
                 <div className="mt-3 grid grid-cols-1 gap-3">
                   <div
                     className={
@@ -3023,7 +3267,7 @@ async function toggleSigninReward(user) {
                           Below 95 will block withdrawal
                         </div>
                       </div>
-            
+
                       <div
                         className={
                           Number(actionsModal.user.creditScore ?? 100) < 95
@@ -3031,8 +3275,8 @@ async function toggleSigninReward(user) {
                               ? "rounded-full border border-red-400/30 bg-red-500/15 px-2.5 py-1 text-[10px] font-semibold text-red-200"
                               : "rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-[10px] font-semibold text-red-700"
                             : theme === "dark"
-                            ? "rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2.5 py-1 text-[10px] font-semibold text-emerald-200"
-                            : "rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700"
+                              ? "rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2.5 py-1 text-[10px] font-semibold text-emerald-200"
+                              : "rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700"
                         }
                       >
                         {Number(actionsModal.user.creditScore ?? 100) < 95
@@ -3040,7 +3284,7 @@ async function toggleSigninReward(user) {
                           : "OK"}
                       </div>
                     </div>
-            
+
                     <div className="mt-3 flex items-center gap-2">
                       <input
                         type="number"
@@ -3064,31 +3308,35 @@ async function toggleSigninReward(user) {
                         }
                         placeholder="100"
                       />
-            
+
                       <button
                         disabled={busyId === actionsModal.user._id}
-                        onClick={() => saveUserCreditScore(actionsModal.user._id)}
+                        onClick={() =>
+                          saveUserCreditScore(actionsModal.user._id)
+                        }
                         className={`rounded-xl border px-3 py-2 text-xs disabled:opacity-50 ${
                           theme === "dark"
                             ? "border-blue-500/25 bg-blue-500/10 text-blue-200 hover:bg-blue-500/15"
                             : "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
                         }`}
                       >
-                        {busyId === actionsModal.user._id ? "Saving..." : "Save Score"}
+                        {busyId === actionsModal.user._id
+                          ? "Saving..."
+                          : "Save Score"}
                       </button>
                     </div>
                   </div>
-            
+
                   <button
                     disabled={busyId === actionsModal.user._id}
                     onClick={() => {
                       const u = actionsModal.user;
-            
+
                       if (u.withdrawalBlocked) {
                         toggleWithdrawalBlock(u);
                         return;
                       }
-            
+
                       setActionsModal({ open: false, user: null });
                       setWithdrawalBlockModal({
                         open: true,
@@ -3111,15 +3359,15 @@ async function toggleSigninReward(user) {
                         : "Block this user from withdrawing"}
                     </div>
                   </button>
-            
+
                   <button
                     disabled={busyId === actionsModal.user._id}
                     onClick={() => {
                       const u = actionsModal.user;
                       const banned = Boolean(u.isBanned);
-            
+
                       setActionsModal({ open: false, user: null });
-            
+
                       setBanModal({
                         open: true,
                         userId: u._id,
@@ -3139,13 +3387,13 @@ async function toggleSigninReward(user) {
                         : "Block user from login"}
                     </div>
                   </button>
-            
+
                   <button
                     disabled={busyId === actionsModal.user._id}
                     onClick={() => {
                       const u = actionsModal.user;
                       setActionsModal({ open: false, user: null });
-            
+
                       setDeleteModal({
                         open: true,
                         userId: u._id,
@@ -3162,7 +3410,7 @@ async function toggleSigninReward(user) {
                 </div>
               </div>
             </div>
-      
+
             <button
               onClick={() => {
                 setActionsModal({ open: false, user: null });
@@ -3219,7 +3467,7 @@ async function toggleSigninReward(user) {
             >
               Cancel
             </button>
-      
+
             <button
               disabled={busyId === banModal.userId}
               onClick={submitBan}
@@ -3230,15 +3478,15 @@ async function toggleSigninReward(user) {
                     ? "border-red-500/25 bg-red-500/15 text-red-200 hover:bg-red-500/20"
                     : "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
                   : theme === "dark"
-                  ? "border-emerald-500/25 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/20"
-                  : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                    ? "border-emerald-500/25 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/20"
+                    : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
               )}
             >
               {busyId === banModal.userId
                 ? "Saving..."
                 : banModal.isBanned
-                ? "Confirm Ban"
-                : "Confirm Unban"}
+                  ? "Confirm Ban"
+                  : "Confirm Unban"}
             </button>
           </div>
         }
@@ -3265,7 +3513,7 @@ async function toggleSigninReward(user) {
               This will allow the user to log in again.
             </div>
           )}
-      
+
           {banModal.isBanned ? (
             <div
               className={
@@ -3283,10 +3531,12 @@ async function toggleSigninReward(user) {
               >
                 Reason (optional)
               </div>
-      
+
               <input
                 value={banModal.reason}
-                onChange={(e) => setBanModal((p) => ({ ...p, reason: e.target.value }))}
+                onChange={(e) =>
+                  setBanModal((p) => ({ ...p, reason: e.target.value }))
+                }
                 placeholder="Example: Fraud / Abuse / Chargeback"
                 className={
                   theme === "dark"
@@ -3336,7 +3586,7 @@ async function toggleSigninReward(user) {
             >
               Cancel
             </button>
-      
+
             <button
               disabled={busyId === orderStartBlockModal.userId}
               onClick={submitOrderStartBlock}
@@ -3346,15 +3596,15 @@ async function toggleSigninReward(user) {
                     ? "rounded-xl border border-red-500/25 bg-red-500/15 px-4 py-2 text-xs text-red-200 hover:bg-red-500/20 disabled:opacity-50"
                     : "rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-700 hover:bg-red-100 disabled:opacity-50"
                   : theme === "dark"
-                  ? "rounded-xl border border-emerald-500/25 bg-emerald-500/15 px-4 py-2 text-xs text-emerald-200 hover:bg-emerald-500/20 disabled:opacity-50"
-                  : "rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
+                    ? "rounded-xl border border-emerald-500/25 bg-emerald-500/15 px-4 py-2 text-xs text-emerald-200 hover:bg-emerald-500/20 disabled:opacity-50"
+                    : "rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
               }
             >
               {busyId === orderStartBlockModal.userId
                 ? "Saving..."
                 : orderStartBlockModal.blocked
-                ? "Confirm Ban Orders"
-                : "Confirm Unban Orders"}
+                  ? "Confirm Ban Orders"
+                  : "Confirm Unban Orders"}
             </button>
           </div>
         }
@@ -3367,15 +3617,15 @@ async function toggleSigninReward(user) {
                   ? "rounded-2xl border border-red-500/25 bg-red-500/10 p-3 text-xs text-red-200"
                   : "rounded-2xl border border-red-200 bg-red-50 p-3 text-xs text-red-700"
                 : theme === "dark"
-                ? "rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-3 text-xs text-emerald-200"
-                : "rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-700"
+                  ? "rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-3 text-xs text-emerald-200"
+                  : "rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-700"
             }
           >
             {orderStartBlockModal.blocked
               ? "This will stop the user from starting new orders. When they click Start Order, they will see your custom message."
               : "This will allow the user to start orders again."}
           </div>
-      
+
           {orderStartBlockModal.blocked ? (
             <div
               className={
@@ -3393,7 +3643,7 @@ async function toggleSigninReward(user) {
               >
                 Reason / User Message
               </div>
-      
+
               <textarea
                 value={orderStartBlockModal.reason}
                 onChange={(e) =>
@@ -3414,7 +3664,7 @@ async function toggleSigninReward(user) {
           ) : null}
         </div>
       </Modal>
-      
+
       {/* Create user modal */}
       <Modal
         open={createUserModal.open}
@@ -3447,7 +3697,7 @@ async function toggleSigninReward(user) {
             >
               Cancel
             </button>
-      
+
             <button
               disabled={busyId === "create-user"}
               onClick={submitCreateUser}
@@ -3479,11 +3729,14 @@ async function toggleSigninReward(user) {
             >
               Phone Number
             </div>
-      
+
             <input
               value={createUserModal.phoneNumber}
               onChange={(e) =>
-                setCreateUserModal((p) => ({ ...p, phoneNumber: e.target.value }))
+                setCreateUserModal((p) => ({
+                  ...p,
+                  phoneNumber: e.target.value,
+                }))
               }
               placeholder="Example: 60123456789"
               className={
@@ -3493,7 +3746,7 @@ async function toggleSigninReward(user) {
               }
             />
           </div>
-      
+
           <div
             className={
               theme === "dark"
@@ -3510,7 +3763,7 @@ async function toggleSigninReward(user) {
             >
               Password
             </div>
-      
+
             <input
               type="password"
               value={createUserModal.password}
@@ -3525,7 +3778,7 @@ async function toggleSigninReward(user) {
               }
             />
           </div>
-      
+
           <div
             className={
               theme === "dark"
@@ -3542,7 +3795,7 @@ async function toggleSigninReward(user) {
             >
               Role
             </div>
-      
+
             <select
               value={createUserModal.role}
               onChange={(e) =>
@@ -3560,12 +3813,14 @@ async function toggleSigninReward(user) {
           </div>
         </div>
       </Modal>
-            
+
       {/* Reset password modal */}
       <Modal
         open={passwordModal.open}
         title="Reset Password"
-        subtitle={passwordModal.userId ? `User: ${passwordModal.phoneNumber}` : ""}
+        subtitle={
+          passwordModal.userId ? `User: ${passwordModal.phoneNumber}` : ""
+        }
         onClose={() =>
           setPasswordModal({
             open: false,
@@ -3593,7 +3848,7 @@ async function toggleSigninReward(user) {
             >
               Cancel
             </button>
-      
+
             <button
               disabled={busyId === passwordModal.userId}
               onClick={submitResetPassword}
@@ -3625,7 +3880,7 @@ async function toggleSigninReward(user) {
             >
               New Password
             </div>
-      
+
             <input
               value={passwordModal.newPassword}
               onChange={(e) =>
@@ -3639,7 +3894,7 @@ async function toggleSigninReward(user) {
               }
               type="text"
             />
-      
+
             <div
               className={
                 theme === "dark"
@@ -3652,7 +3907,7 @@ async function toggleSigninReward(user) {
           </div>
         </div>
       </Modal>
-      
+
       {/* Reset Withdrawal PIN modal */}
       <Modal
         open={withdrawPinModal.open}
@@ -3687,7 +3942,7 @@ async function toggleSigninReward(user) {
             >
               Cancel
             </button>
-      
+
             <button
               disabled={busyId === withdrawPinModal.userId}
               onClick={submitResetWithdrawPin}
@@ -3719,7 +3974,7 @@ async function toggleSigninReward(user) {
             >
               New PIN
             </div>
-      
+
             <input
               value={withdrawPinModal.newPin}
               onChange={(e) =>
@@ -3734,7 +3989,7 @@ async function toggleSigninReward(user) {
               type="text"
               inputMode="numeric"
             />
-      
+
             <div
               className={
                 theme === "dark"
@@ -3747,7 +4002,7 @@ async function toggleSigninReward(user) {
           </div>
         </div>
       </Modal>
-      
+
       {/* Reset phone modal */}
       <Modal
         open={phoneModal.open}
@@ -3780,7 +4035,7 @@ async function toggleSigninReward(user) {
             >
               Cancel
             </button>
-      
+
             <button
               disabled={busyId === phoneModal.userId}
               onClick={submitResetPhone}
@@ -3812,7 +4067,7 @@ async function toggleSigninReward(user) {
             >
               New Phone Number
             </div>
-      
+
             <input
               value={phoneModal.newPhone}
               onChange={(e) =>
@@ -3826,7 +4081,7 @@ async function toggleSigninReward(user) {
               }
               type="text"
             />
-      
+
             <div
               className={
                 theme === "dark"
@@ -3839,13 +4094,15 @@ async function toggleSigninReward(user) {
           </div>
         </div>
       </Modal>
-      
+
       {/* Delete modal */}
       <Modal
         open={deleteModal.open}
         title="Delete User"
         subtitle={deleteModal.userId ? `User: ${deleteModal.phoneNumber}` : ""}
-        onClose={() => setDeleteModal({ open: false, userId: null, phoneNumber: "" })}
+        onClose={() =>
+          setDeleteModal({ open: false, userId: null, phoneNumber: "" })
+        }
         footer={
           <div className="flex items-center justify-end gap-2">
             <button
@@ -3860,7 +4117,7 @@ async function toggleSigninReward(user) {
             >
               Cancel
             </button>
-      
+
             <button
               disabled={busyId === deleteModal.userId}
               onClick={submitDelete}
@@ -3870,7 +4127,9 @@ async function toggleSigninReward(user) {
                   : "rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-700 hover:bg-red-100 disabled:opacity-50"
               }
             >
-              {busyId === deleteModal.userId ? "Deleting..." : "Delete Permanently"}
+              {busyId === deleteModal.userId
+                ? "Deleting..."
+                : "Delete Permanently"}
             </button>
           </div>
         }
@@ -3885,10 +4144,12 @@ async function toggleSigninReward(user) {
           >
             This action is permanent and cannot be undone.
           </div>
-      
+
           <div
             className={
-              theme === "dark" ? "text-xs text-white/60" : "text-xs text-gray-600"
+              theme === "dark"
+                ? "text-xs text-white/60"
+                : "text-xs text-gray-600"
             }
           >
             If you only want to block the user, use{" "}
