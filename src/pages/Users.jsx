@@ -2843,8 +2843,8 @@ export default function Users() {
 
                     <div className={`mt-1 ${drawerMutedClass}`}>
                       {actionsModal.user.isVerified
-                        ? "Click to remove verified badge"
-                        : "Click to verify this user"}
+                        ? "Click to unverify"
+                        : "Click to verify"}
                     </div>
 
                     {actionsModal.user.verifiedAt ? (
